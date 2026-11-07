@@ -1,0 +1,31 @@
+{
+    "font": "assets/fnt/PressStart2P.ttf",
+    "title_scene": {
+        "title": {
+            "text": "BOSCONIAN",
+            "size": 16,
+            "color": {"r": 255, "g": 255, "b": 255},
+            "position": {"x": 128, "y": 70}
+        },
+        "press_start": {
+            "text": "PRESS ENTER",
+            "size": 8,
+            "color": {"r": 255, "g": 200, "b": 0},
+            "position": {"x": 128, "y": 140}
+        }
+    },
+    "play_scene": {
+        "round": {
+            "text": "ROUND 1",
+            "size": 8,
+            "color": {"r": 255, "g": 255, "b": 255},
+            "position": {"x": 128, "y": 104}
+        },
+        "hint": {
+            "text": "ESC: TITLE",
+            "size": 8,
+            "color": {"r": 150, "g": 150, "b": 150},
+            "position": {"x": 128, "y": 190}
+        }
+    }
+}

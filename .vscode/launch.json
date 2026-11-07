@@ -1,0 +1,17 @@
+{
+    // F5 ejecuta el juego (main.py) desde la raíz del proyecto.
+    // Más info: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Ejecutar juego (main.py)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "cwd": "${workspaceFolder}",
+            "pythonArgs": ["-B"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

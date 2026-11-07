@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Builds (pygbag / PyInstaller) - se regeneran, no se versionan
+build/
+dist/
+
+# IDEs y sistema
+# .vscode: se comparte solo la config de ejecución (F5) y settings del proyecto
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
