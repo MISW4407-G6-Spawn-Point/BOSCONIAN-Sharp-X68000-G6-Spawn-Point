@@ -11,7 +11,7 @@
 |--------|--------|---------------|
 |Santiago Bernal Gonzalez| s.bernalg2@uniandes.edu.co|sbernalg2|
 |Maria Alejandra Sanabria Salazar|ma.sanabrias@uniandes.edu.co|               |
-|Amelia Serrano Arango|a.serranoa2@uniandes.edu.co|               |
+|Amelia Serrano Arango|a.serranoa2@uniandes.edu.co|ameliaserranoar|
 
 ### Enlaces
 - **Repositorio GitHub (privado):** https://github.com/sbernalg2/BOSCONIAN-Sharp-X68000-G6-Spawn-Point
