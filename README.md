@@ -6,7 +6,7 @@ Stack: Python + Pygame-CE + Esper 2.5 · Resolución: 256x208
 | Nombre | Correo | Codigo |
 |--------|--------|---------------|
 |Santiago Bernal Gonzalez| s.bernalg2@uniandes.edu.co|202115057|
-|Maria Alejandra Sanabria Salazar|ma.sanabrias@uniandes.edu.co|               |
+|Maria Alejandra Sanabria Salazar|ma.sanabrias@uniandes.edu.co|202326786|
 |Amelia Serrano Arango|a.serranoa2@uniandes.edu.co|202221556|
 
 ## Mapa del repositorio
