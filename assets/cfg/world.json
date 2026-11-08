@@ -1,0 +1,25 @@
+{
+    "star_colors": [
+        {
+            "r": 213,
+            "g": 0,
+            "b": 0
+        },
+        {
+            "r": 118,
+            "g": 255,
+            "b": 3
+        },
+        {
+            "r": 65,
+            "g": 105,
+            "b": 225
+        }
+    ],
+    "stars_number": 100,
+    "stars_parallax_factor": 1.0,
+    "stars_blink_speed": {
+        "min": 0.25,
+        "max": 0.5
+    }
+}
