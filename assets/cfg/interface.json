@@ -1,31 +1,75 @@
 {
     "font": "assets/fnt/PressStart2P.ttf",
-    "title_scene": {
-        "title": {
-            "text": "BOSCONIAN",
-            "size": 16,
-            "color": {"r": 255, "g": 255, "b": 255},
-            "position": {"x": 128, "y": 70}
+    "play_area": {"x": 0, "y": 0, "w": 240, "h": 256},
+    "boot_scene": {
+        "cursor": {
+            "position": {"x": 36, "y": 24},
+            "size": {"w": 6, "h": 8},
+            "color": {"r": 235, "g": 235, "b": 235},
+            "blink_time": 0.5
         },
-        "press_start": {
-            "text": "PRESS ENTER",
-            "size": 8,
-            "color": {"r": 255, "g": 200, "b": 0},
-            "position": {"x": 128, "y": 140}
+        "function_keys": {
+            "labels": ["C1", "CU", "CA", "S1", "SU", "VOID", "NWL", "INS", "N&CU", "EOF"],
+            "position": {"x": 8, "y": 226},
+            "box_size": {"w": 28, "h": 10},
+            "step": 30,
+            "group_size": 5,
+            "group_gap": 6,
+            "box_color": {"r": 230, "g": 230, "b": 230},
+            "text_size": 6,
+            "text_color": {"r": 60, "g": 60, "b": 60}
         }
     },
-    "play_scene": {
-        "round": {
-            "text": "ROUND 1",
-            "size": 8,
-            "color": {"r": 255, "g": 255, "b": 255},
-            "position": {"x": 128, "y": 104}
+    "title_scene": {
+        "logo": {
+            "image": "assets/img/titulo.png",
+            "position": {"x": 120, "y": 84}
         },
-        "hint": {
-            "text": "ESC: TITLE",
-            "size": 8,
-            "color": {"r": 150, "g": 150, "b": 150},
-            "position": {"x": 128, "y": 190}
+        "texts": [
+            {"text": "STAR DESTROYER", "size": 8, "color": {"r": 200, "g": 0, "b": 0}, "position": {"x": 120, "y": 96}},
+            {"text": "© 1981 NAMCO", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 176}},
+            {"text": "ARRANGED BY", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 194}},
+            {"text": "DEMPA", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 205}},
+            {"text": "NEKOMANMA", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 216}},
+            {"text": "AS", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 227}},
+            {"text": "T. MATSUSHIMA", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 238}}
+        ]
+    },
+    "level_scene": {
+        "texts": [
+            {"text": "LEVEL 1", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 104}},
+            {"text": "AROUND THE PLANET RED.", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 124}}
+        ]
+    },
+    "hud": {
+        "texts": [
+            {"text": "HI-SCORE", "size": 8, "color": {"r": 220, "g": 0, "b": 0}, "position": {"x": 244, "y": 10}, "align": "left"},
+            {"text": "20000", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 316, "y": 22}, "align": "right"},
+            {"text": "1UP", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 244, "y": 38}, "align": "left"},
+            {"text": "0", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 316, "y": 50}, "align": "right"},
+            {"text": "CONDITION", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 244, "y": 74}, "align": "left"},
+            {"text": "ROUND", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 244, "y": 236}, "align": "left"},
+            {"text": "1", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 316, "y": 236}, "align": "right"}
+        ],
+        "condition_bar": {
+            "position": {"x": 244, "y": 86},
+            "size": {"w": 72, "h": 14},
+            "color": {"r": 0, "g": 230, "b": 120},
+            "text": "GREEN",
+            "text_size": 8,
+            "text_color": {"r": 0, "g": 0, "b": 0}
+        },
+        "radar": {
+            "position": {"x": 244, "y": 108},
+            "size": {"w": 72, "h": 90},
+            "color": {"r": 144, "g": 144, "b": 255}
+        },
+        "lives": {
+            "image": "assets/img/naves.png",
+            "area": {"x": 124, "y": 7, "w": 15, "h": 18},
+            "count": 3,
+            "position": {"x": 244, "y": 208},
+            "spacing": 3
         }
     }
 }

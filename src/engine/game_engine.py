@@ -6,7 +6,9 @@ import pygame
 
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
+from src.game.boot_scene import BootScene
 from src.game.title_scene import TitleScene
+from src.game.level_scene import LevelScene
 from src.game.play_scene import PlayScene
 
 
@@ -24,12 +26,14 @@ class GameEngine:
         self.framerate = self.window_cfg["framerate"]
         self.delta_time = 0
         self.bg_color = pygame.Color(self.window_cfg["bg_color"]["r"],
-                                     self.window_cfg["bg_color"]["g"],
-                                     self.window_cfg["bg_color"]["b"])
+                                    self.window_cfg["bg_color"]["g"],
+                                    self.window_cfg["bg_color"]["b"])
 
         # Patron Escena: todas las escenas registradas por nombre
         self._scenes:dict[str, Scene] = {}
+        self._scenes["BOOT_SCENE"] = BootScene(self)
         self._scenes["TITLE_SCENE"] = TitleScene(self)
+        self._scenes["LEVEL_SCENE"] = LevelScene(self)
         self._scenes["PLAY_SCENE"] = PlayScene(self)
         self._current_scene:Scene = None
         self._scene_name_to_switch:str = None

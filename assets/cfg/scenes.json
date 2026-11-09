@@ -1,0 +1,17 @@
+{
+    "BOOT_SCENE": {
+        "duration": 3.0,
+        "next_scene": "TITLE_SCENE"
+    },
+    "TITLE_SCENE": {
+        "duration": 6.0,
+        "next_scene": "LEVEL_SCENE"
+    },
+    "LEVEL_SCENE": {
+        "duration": 3.0,
+        "next_scene": "PLAY_SCENE"
+    },
+    "PLAY_SCENE": {
+        "back_scene": "TITLE_SCENE"
+    }
+}
