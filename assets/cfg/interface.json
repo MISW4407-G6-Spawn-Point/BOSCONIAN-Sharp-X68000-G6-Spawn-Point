@@ -41,6 +41,14 @@
             {"text": "AROUND THE PLANET RED.", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 124}}
         ]
     },
+    "pause": {
+        "text": "PAUSE!",
+        "size": 8,
+        "color": {"r": 255, "g": 255, "b": 255},
+        "position": {"x": 120, "y": 90},
+        "blink_time": 0,
+        "hide_world": false
+    },
     "hud": {
         "texts": [
             {"text": "HI-SCORE", "size": 8, "color": {"r": 220, "g": 0, "b": 0}, "position": {"x": 244, "y": 10}, "align": "left"},
@@ -62,7 +70,9 @@
         "radar": {
             "position": {"x": 244, "y": 108},
             "size": {"w": 72, "h": 90},
-            "color": {"r": 144, "g": 144, "b": 255}
+            "color": {"r": 144, "g": 144, "b": 255},
+            "dot_size": {"w": 2, "h": 2},
+            "player_color": {"r": 255, "g": 255, "b": 255}
         },
         "lives": {
             "image": "assets/img/naves.png",
