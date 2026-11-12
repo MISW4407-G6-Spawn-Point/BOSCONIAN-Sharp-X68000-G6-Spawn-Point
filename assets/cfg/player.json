@@ -1,0 +1,7 @@
+{
+    "image": "assets/img/naves.png",
+    "area": {"x": 124, "y": 7, "w": 15, "h": 18},
+    "max_speed": 75,
+    "acceleration": 40,
+    "start_direction": 0
+}

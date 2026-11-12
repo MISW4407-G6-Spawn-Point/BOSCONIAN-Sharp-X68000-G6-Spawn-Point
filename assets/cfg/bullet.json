@@ -1,0 +1,11 @@
+{
+    "image": "assets/img/naves.png",
+    "areas": {
+        "vertical": {"x": 4, "y": 75, "w": 4, "h": 6},
+        "horizontal": {"x": 13, "y": 76, "w": 6, "h": 4},
+        "diagonal": {"x": 23, "y": 75, "w": 7, "h": 6}
+    },
+    "velocity": 240,
+    "max_bullets": 6,
+    "sound": "assets/snd/laser.ogg"
+}
