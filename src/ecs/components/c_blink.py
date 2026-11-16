@@ -1,4 +1,5 @@
 import pygame
+import random
 
 class CBlink:
     """Alterna entre dos superficies (visible / invisible).
@@ -9,5 +10,5 @@ class CBlink:
         self.off_surf = pygame.Surface(on_surf.get_size(), pygame.SRCALPHA)
         self.interval_min = interval_min
         self.interval_max = interval_min if interval_max is None else interval_max
-        self.time = interval_min
+        self.time = random.uniform(0, self.interval_max)
         self.visible = True

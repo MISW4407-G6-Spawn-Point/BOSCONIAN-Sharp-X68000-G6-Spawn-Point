@@ -1,25 +1,44 @@
 {
+    "world_size": {   
+        "w": 1536, 
+        "h": 1920
+    },
+    "player_start": {
+        "x": 768, 
+        "y": 960
+    },
     "star_colors": [
         {
-            "r": 213,
-            "g": 0,
+            "r": 213, 
+            "g": 0, 
             "b": 0
         },
         {
-            "r": 118,
-            "g": 255,
+            "r": 118, 
+            "g": 255, 
             "b": 3
         },
-        {
-            "r": 65,
-            "g": 105,
-            "b": 225
-        }
+        {"r": 65, 
+        "g": 105, 
+        "b": 225
+        },
+        {"r": 255, 
+        "g": 200, 
+        "b": 0
+        },
+        {"r": 255, 
+        "g": 255, 
+        "b": 255
+    }
     ],
     "stars_number": 100,
-    "stars_parallax_factor": 1.0,
-    "stars_blink_speed": {
-        "min": 0.25,
-        "max": 0.5
-    }
+    "stars_parallax": {"min": 0.3,
+    "max": 0.6
+},
+    "stars_menu_velocity": {"min": 10, 
+    "max": 25
+},
+    "stars_blink_speed": {"min": 0.25, 
+    "max": 0.5
+}
 }
