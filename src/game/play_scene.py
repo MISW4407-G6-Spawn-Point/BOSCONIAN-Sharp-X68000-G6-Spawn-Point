@@ -3,21 +3,31 @@
 import pygame
 
 from src.create.prefab_creator import (create_camera, create_hud, create_input_play,
+                                       create_level_objects,
                                        create_pause_text, create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield)
 from src.ecs.components.c_camera import CCamera
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_player_ship import CPlayerShip
+from src.ecs.components.c_level_object import CLevelObject
+from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
+from src.ecs.components.c_score_display import CScoreDisplay
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_bullet_screen import system_bullet_screen
 from src.ecs.systems.s_camera import system_camera
+from src.ecs.systems.s_condition import system_condition
+from src.ecs.systems.s_collision_bullet_level_object import system_collision_bullet_level_object
+from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
+from src.ecs.systems.s_explosion import system_explosion
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_player_ship import system_player_ship
 from src.ecs.systems.s_radar import system_radar
 from src.ecs.systems.s_rendering import system_rendering
+from src.ecs.systems.s_score_display import system_score_display
+from src.ecs.systems.s_sprite_animation import system_sprite_animation
 from src.ecs.systems.s_star_parallax import system_star_parallax
 from src.ecs.systems.s_star_wrap import system_star_wrap
 from src.ecs.systems.s_world_wrap import system_world_wrap
@@ -34,12 +44,30 @@ _DIRECTION_INPUTS = {
 
 
 class PlayScene(Scene):
+    def __init__(self, game_engine):
+        super().__init__(game_engine)
+        self._level_index = 1
+        self._score = 0
+
     def do_create(self):
         interface_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")
         world_cfg = ServiceLocator.configs_service.get("assets/cfg/world.json")
         scenes_cfg = ServiceLocator.configs_service.get("assets/cfg/scenes.json")
+        levels_cfg = ServiceLocator.configs_service.get("assets/cfg/level.json")
+        level_name = f"round{self._level_index}"
+        if level_name not in levels_cfg:
+            level_name = f"level{self._level_index}"
+        if level_name not in levels_cfg:
+            self._level_index = 1
+            level_name = "round1"
+            if level_name not in levels_cfg:
+                level_name = "level1"
+        self._level_cfg = levels_cfg[level_name]
         player_cfg = ServiceLocator.configs_service.get("assets/cfg/player.json")
         self._bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
+        self._explosion_cfg = ServiceLocator.configs_service.get(
+            "assets/cfg/explosion.json"
+        )
         self._back_scene = scenes_cfg["PLAY_SCENE"]["back_scene"]
         self._play_area = interface_cfg["play_area"]
         self._world_size = world_cfg["world_size"]
@@ -51,13 +79,30 @@ class PlayScene(Scene):
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
         self._player_entity = create_player_ship(self.ecs_world, player_cfg,
                                                  world_cfg["player_start"])
+        level_entities = create_level_objects(self.ecs_world, self._level_cfg)
         self._p_ship = self.ecs_world.component_for_entity(self._player_entity, CPlayerShip)
         camera_entity = create_camera(self.ecs_world, self._player_entity,
                                       self._play_area, self._world_size)
         self._camera = self.ecs_world.component_for_entity(camera_entity, CCamera)
-        create_hud(self.ecs_world, interface_cfg["hud"], interface_cfg["font"])
+        create_hud(
+            self.ecs_world,
+            interface_cfg["hud"],
+            interface_cfg["font"],
+            self._level_cfg["condition"],
+            self._score,
+            self._level_index,
+        )
         create_radar_dot(self.ecs_world, self._player_entity,
                          self._radar_cfg["dot_size"], self._radar_cfg["player_color"])
+        for entity in level_entities:
+            level_object = self.ecs_world.try_component(entity, CLevelObject)
+            if level_object is not None and level_object.object_type == "enemy_base":
+                create_radar_dot(
+                    self.ecs_world,
+                    entity,
+                    self._radar_cfg["dot_size"],
+                    self._radar_cfg["base_color"],
+                )
         create_input_play(self.ecs_world)
         system_camera(self.ecs_world)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
@@ -66,8 +111,21 @@ class PlayScene(Scene):
         system_blink(self.ecs_world, delta_time)
         if self._paused:
             return  # en pausa solo titilan las estrellas
+        system_condition(self.ecs_world, delta_time)
+        system_enemy_base_eye(self.ecs_world, delta_time)
+        system_sprite_animation(self.ecs_world, delta_time)
         system_player_ship(self.ecs_world, delta_time)
         system_movement(self.ecs_world, delta_time)
+        system_collision_bullet_level_object(
+            self.ecs_world,
+            self._explosion_cfg,
+        )
+        system_explosion(self.ecs_world, delta_time)
+        system_score_display(self.ecs_world)
+        if not self.ecs_world.get_component(CEnemyBaseCombat):
+            self._score = self._current_score()
+            self._level_index += 1
+            self.switch_scene("PLAY_SCENE")
         system_world_wrap(self.ecs_world, self._world_size["w"], self._world_size["h"])
         system_camera(self.ecs_world)
         system_star_parallax(self.ecs_world, self._camera.delta)
@@ -112,3 +170,9 @@ class PlayScene(Scene):
             num_bullets = len(self.ecs_world.get_component(CTagBullet))
             if num_bullets + 2 <= self._bullet_cfg["max_bullets"]:
                 create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg)
+
+    def _current_score(self) -> int:
+        for _, score_display in self.ecs_world.get_component(CScoreDisplay):
+            if score_display.tracks_score:
+                return score_display.value
+        return self._score

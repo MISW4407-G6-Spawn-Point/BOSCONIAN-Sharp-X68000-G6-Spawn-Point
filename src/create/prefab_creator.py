@@ -18,8 +18,30 @@ from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.tags.c_tag_world import CTagWorld
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.c_radar_dot import CRadarDot
+from src.ecs.components.c_level_object import CLevelObject
+from src.ecs.components.c_condition_display import CConditionDisplay
+from src.ecs.components.c_enemy_base_eye import CEnemyBaseEye
+from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
+from src.ecs.components.c_explosion import CExplosion
+from src.ecs.components.c_score_display import CScoreDisplay
+from src.ecs.components.c_sprite_animation import CSpriteAnimation
 from src.ecs.components.tags.c_tag_hide_on_pause import CTagHideOnPause
 from src.ecs.components.tags.c_tag_pause import CTagPause
+from src.create.enemy_base_composer import enemy_base_composer
+
+_LEVEL_SPRITE_AREAS = {
+    "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
+    "1-a": {"x": 149, "y": 9, "w": 15, "h": 11},
+    "1-b": {"x": 166, "y": 6, "w": 14, "h": 14},
+    "1-c": {"x": 181, "y": 8, "w": 14, "h": 12},
+    "2-a": {"x": 149, "y": 34, "w": 15, "h": 11},
+    "2-b": {"x": 167, "y": 31, "w": 14, "h": 14},
+    "2-c": {"x": 182, "y": 33, "w": 14, "h": 12},
+    "mine": {"x": 2, "y": 89, "w": 11, "h": 11},
+    "i": {"x": 0, "y": 111, "w": 14, "h": 14},
+    "p": {"x": 20, "y": 113, "w": 13, "h": 12},
+    "e": {"x": 41, "y": 109, "w": 7, "h": 16},
+}
 
 
 def _color(c:dict) -> pygame.Color:
@@ -33,6 +55,201 @@ def create_sprite(world:esper.World, pos:pygame.Vector2, vel:pygame.Vector2,
     world.add_component(sprite_entity, CVelocity(vel))
     world.add_component(sprite_entity, CSurface.from_surface(surface))
     return sprite_entity
+
+
+def create_enemy_base_surface(
+    enemy_base_cfg:dict,
+    core_sprite:pygame.Surface,
+    module_sprites:list[pygame.Surface],
+) -> pygame.Surface:
+    if len(module_sprites) != 6:
+        raise ValueError("module_sprites debe contener exactamente seis sprites")
+
+    sprite_sheet = ServiceLocator.images_service.get(enemy_base_cfg["image"])
+    left_support = _create_level_surface(
+        enemy_base_cfg["image"],
+        {"x": 90, "y": 0, "w": 13, "h": 42},
+    )
+    right_support = pygame.transform.flip(left_support, True, False)
+    left_connector = _create_level_surface(
+        enemy_base_cfg["image"],
+        {"x": 98, "y": 19, "w": 8, "h": 4},
+    )
+    right_connector = pygame.transform.flip(left_connector, True, False)
+    eye_sprite = core_sprite
+    return enemy_base_composer(
+        left_support,
+        right_support,
+        left_connector,
+        right_connector,
+        eye_sprite,
+        *module_sprites,
+        destination_size=enemy_base_cfg.get("size") or (99, 80),
+    )
+
+
+def _create_level_surface(image_path:str, sprite_area:dict) -> pygame.Surface:
+    sprite_sheet = ServiceLocator.images_service.get(image_path)
+    surface = sprite_sheet.subsurface(pygame.Rect(
+        sprite_area["x"],
+        sprite_area["y"],
+        sprite_area["w"],
+        sprite_area["h"],
+    )).copy()
+    surface.set_colorkey((255, 0, 255))
+    return surface
+
+
+def _create_level_object(
+    world:esper.World,
+    object_cfg:dict,
+    object_type:str,
+    score:int,
+    node_score:int = 0,
+) -> int:
+    sprite_area = object_cfg.get("sprite_area", _LEVEL_SPRITE_AREAS[object_type])
+    surface = _create_level_surface(object_cfg["image"], sprite_area)
+    position = pygame.Vector2(
+        object_cfg["position"]["x"],
+        object_cfg["position"]["y"],
+    )
+    entity = create_sprite(world, position, pygame.Vector2(0, 0), surface)
+    world.add_component(entity, CTagWorld())
+    world.add_component(entity, CLevelObject(object_type, score, node_score))
+    return entity
+
+
+def _create_mine_object(world: esper.World, object_cfg: dict) -> int:
+    first_frame = _create_level_surface(
+        object_cfg["image"],
+        object_cfg.get("full_sprite_area", {"x": 0, "y": 87, "w": 16, "h": 15}),
+    )
+    second_frame = _create_level_surface(
+        object_cfg["image"],
+        object_cfg.get(
+            "alternate_sprite_area",
+            {"x": 19, "y": 87, "w": 16, "h": 15},
+        ),
+    )
+    frames = []
+    for frame in (first_frame, second_frame):
+        frame.set_colorkey((255, 0, 255))
+        frames.append(frame)
+
+    entity = create_sprite(
+        world,
+        pygame.Vector2(object_cfg["position"]["x"], object_cfg["position"]["y"]),
+        pygame.Vector2(0, 0),
+        frames[0],
+    )
+    world.add_component(entity, CTagWorld())
+    world.add_component(entity, CLevelObject(
+        "mine",
+        object_cfg["score"],
+    ))
+    world.add_component(entity, CSpriteAnimation(frames))
+    return entity
+
+
+def _create_enemy_base_object(
+    world: esper.World,
+    enemy_base_cfg: dict,
+) -> int:
+    sprite_sheet = ServiceLocator.images_service.get(enemy_base_cfg["image"])
+    left_support = sprite_sheet.subsurface(pygame.Rect(90, 0, 13, 42)).copy()
+    left_support.set_colorkey((255, 0, 255))
+    right_support = pygame.transform.flip(left_support, True, False)
+    left_connector = sprite_sheet.subsurface(pygame.Rect(98, 19, 8, 4)).copy()
+    left_connector.set_colorkey((255, 0, 255))
+    right_connector = pygame.transform.flip(left_connector, True, False)
+    base_surface = pygame.Surface((99, 80), pygame.SRCALPHA)
+    eye_frames = []
+    for frame_index in range(4):
+        frame_area = pygame.Rect(frame_index * 24, 46, 20, 20)
+        eye_frame = sprite_sheet.subsurface(frame_area).copy()
+        eye_frame.set_colorkey((255, 0, 255))
+        eye_frames.append(eye_frame)
+
+    entity = create_sprite(
+        world,
+        pygame.Vector2(enemy_base_cfg["position"]["x"],
+                       enemy_base_cfg["position"]["y"]) - pygame.Vector2(49, 40),
+        pygame.Vector2(0, 0),
+        base_surface,
+    )
+    world.add_component(entity, CTagWorld())
+    world.add_component(entity, CLevelObject(
+        "enemy_base",
+        enemy_base_cfg["base_score"],
+        enemy_base_cfg["node_score"],
+    ))
+
+    node_frames = []
+    for frame_index in range(4):
+        frame = _create_level_surface(
+            enemy_base_cfg["image"],
+            {"x": frame_index * 21, "y": 9, "w": 16, "h": 16},
+        )
+        node_frames.append([frame] * 6)
+    combat = CEnemyBaseCombat(
+        (left_support, right_support),
+        (left_connector, right_connector),
+        eye_frames,
+        node_frames,
+    )
+    animated_surface = combat.compose()
+    world.component_for_entity(entity, CSurface).surf = animated_surface
+    world.add_component(entity, CEnemyBaseEye(animated_surface, eye_frames))
+    world.add_component(entity, combat)
+    return entity
+
+
+def create_level_objects(world:esper.World, level_cfg:dict) -> list[int]:
+    """Crea las bases y enemigos configurados en el nivel seleccionado."""
+    created_entities = []
+    enemy_base_configs = level_cfg["enemy_bases"]
+    if isinstance(enemy_base_configs, dict):
+        enemy_base_configs = [enemy_base_configs]
+
+    occupied_rectangles = []
+    for enemy_base_cfg in enemy_base_configs:
+        enemy_base_cfg = dict(enemy_base_cfg)
+        enemy_base_cfg.setdefault("sprite_area", _LEVEL_SPRITE_AREAS["enemy_base"])
+        created_entities.append(_create_enemy_base_object(world, enemy_base_cfg))
+        occupied_rectangles.append(pygame.Rect(
+            enemy_base_cfg["position"]["x"] - 49,
+            enemy_base_cfg["position"]["y"] - 40,
+            99,
+            80,
+        ))
+    for enemy_cfg in level_cfg["enemies"]:
+        sprite_area = enemy_cfg.get(
+            "sprite_area",
+            _LEVEL_SPRITE_AREAS[enemy_cfg["type"]],
+        )
+        enemy_surface = _create_level_surface(enemy_cfg["image"], sprite_area)
+        enemy_rect = pygame.Rect(
+            enemy_cfg["position"]["x"],
+            enemy_cfg["position"]["y"],
+            enemy_surface.get_width(),
+            enemy_surface.get_height(),
+        )
+        if any(enemy_rect.colliderect(occupied) for occupied in occupied_rectangles):
+            raise ValueError(
+                f"El enemigo {enemy_cfg['type']} se solapa con otro elemento"
+            )
+        occupied_rectangles.append(enemy_rect)
+        if enemy_cfg["type"] == "mine":
+            created_entities.append(_create_mine_object(world, enemy_cfg))
+        else:
+            created_entities.append(_create_level_object(
+                world,
+                enemy_cfg,
+                enemy_cfg["type"],
+                enemy_cfg["score"],
+            ))
+
+    return created_entities
 
 
 def _anchor(position:pygame.Vector2, size:pygame.Vector2, align:str) -> pygame.Vector2:
@@ -56,6 +273,20 @@ def create_text(world:esper.World, text:str, font_path:str, size:int, color:dict
     world.add_component(text_entity, CTransform(position))
     world.add_component(text_entity, CTagUI(layer))
     return text_entity
+
+
+def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: dict) -> int:
+    frames = []
+    for frame_area in explosion_cfg["frames"]:
+        frames.append(_create_level_surface(explosion_cfg["image"], frame_area))
+
+    first_frame = frames[0]
+    position = center - pygame.Vector2(first_frame.get_size()) / 2
+    entity = create_sprite(world, position, pygame.Vector2(0, 0), first_frame)
+    world.add_component(entity, CExplosion(frames, explosion_cfg["frame_duration"]))
+    world.add_component(entity, CTagWorld())
+    ServiceLocator.sounds_service.play(explosion_cfg["sound"])
+    return entity
 
 
 def create_texts(world:esper.World, texts:list, font_path:str):
@@ -97,16 +328,82 @@ def create_starfield(world:esper.World, world_cfg:dict, area:dict, in_menu:bool)
                             CBlink(c_surface.surf, blink["min"], blink["max"]))
 
 
-def create_hud(world:esper.World, hud_cfg:dict, font_path:str) -> None:
+def create_hud(
+    world:esper.World,
+    hud_cfg:dict,
+    font_path:str,
+    condition_cfg:dict = None,
+    initial_score: int = 0,
+    round_number: int = 1,
+) -> None:
     """Panel derecho: record, puntaje, condicion, radar, vidas y ronda."""
-    create_texts(world, hud_cfg["texts"], font_path)
+    score_entity = None
+    round_entity = None
+    for index, text_cfg in enumerate(hud_cfg["texts"]):
+        created_text_entity = create_text(
+            world,
+            text_cfg["text"],
+            font_path,
+            text_cfg["size"],
+            text_cfg["color"],
+            text_cfg["position"],
+            text_cfg.get("align", "center"),
+        )
+        if index == 3:
+            score_entity = created_text_entity
+        elif index == 6:
+            round_entity = created_text_entity
 
     bar = hud_cfg["condition_bar"]
-    create_rect(world, bar["position"], bar["size"], bar["color"])
+    bar_entity = create_rect(world, bar["position"], bar["size"], bar["color"])
     text_pos = {"x": bar["position"]["x"] + bar["size"]["w"] / 2,
-                "y": bar["position"]["y"] + (bar["size"]["h"] - bar["text_size"]) / 2}
-    create_text(world, bar["text"], font_path, bar["text_size"], bar["text_color"],
-                text_pos, layer=2)
+                "y": bar["position"]["y"] + bar["size"]["h"] / 2}
+    condition_text_entity = create_text(
+        world,
+        bar["text"],
+        font_path,
+        bar["text_size"],
+        bar["text_color"],
+        text_pos,
+        layer=2,
+    )
+    score_cfg = hud_cfg["texts"][3]
+    score_display = CScoreDisplay(
+        score_cfg["position"]["x"],
+        score_cfg["position"]["y"] + score_cfg["size"] / 2,
+        font_path,
+        score_cfg["size"],
+        _color(score_cfg["color"]),
+        initial_score,
+    )
+    world.add_component(score_entity, score_display)
+    round_cfg = hud_cfg["texts"][6]
+    world.add_component(round_entity, CScoreDisplay(
+        round_cfg["position"]["x"],
+        round_cfg["position"]["y"] + round_cfg["size"] / 2,
+        font_path,
+        round_cfg["size"],
+        _color(round_cfg["color"]),
+        round_number,
+        tracks_score=False,
+    ))
+    text_surface = world.component_for_entity(condition_text_entity, CSurface)
+    text_transform = world.component_for_entity(condition_text_entity, CTransform)
+    text_transform.pos = pygame.Vector2(
+        text_pos["x"],
+        text_pos["y"],
+    ) - pygame.Vector2(text_surface.surf.get_size()) / 2
+    if condition_cfg is not None:
+        world.add_component(condition_text_entity, CConditionDisplay(
+            bar_entity,
+            condition_text_entity,
+            condition_cfg["yellow"],
+            condition_cfg["red"],
+            font_path,
+            bar["text_size"],
+            _color(bar["text_color"]),
+            pygame.Vector2(text_pos["x"], text_pos["y"]),
+        ))
 
     radar = hud_cfg["radar"]
     create_rect(world, radar["position"], radar["size"], radar["color"])

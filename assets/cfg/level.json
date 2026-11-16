@@ -1,0 +1,1372 @@
+{
+    "level1": {
+        "specialpower": "1-1",
+        "condition": {
+            "yellow": 21,
+            "red": 55
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                },
+                "base_score": 1500,
+                "node_score": 200
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                },
+                "base_score": 1500,
+                "node_score": 200
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 149,
+                    "y": 9,
+                    "w": 15,
+                    "h": 11
+                },
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 166,
+                    "y": 6,
+                    "w": 14,
+                    "h": 14
+                },
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 181,
+                    "y": 8,
+                    "w": 14,
+                    "h": 12
+                },
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 149,
+                    "y": 34,
+                    "w": 15,
+                    "h": 11
+                },
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 167,
+                    "y": 31,
+                    "w": 14,
+                    "h": 14
+                },
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 182,
+                    "y": 33,
+                    "w": 14,
+                    "h": 12
+                },
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 2,
+                    "y": 89,
+                    "w": 11,
+                    "h": 11
+                },
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 0,
+                    "y": 111,
+                    "w": 14,
+                    "h": 14
+                },
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 20,
+                    "y": 113,
+                    "w": 13,
+                    "h": 12
+                },
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "sprite_area": {
+                    "x": 41,
+                    "y": 109,
+                    "w": 7,
+                    "h": 16
+                },
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level2": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 19,
+            "red": 50
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level3": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 17,
+            "red": 45
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level4": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 15,
+            "red": 40
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level5": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 13,
+            "red": 35
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level6": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 11,
+            "red": 30
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level7": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 9,
+            "red": 25
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level8": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 7,
+            "red": 20
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level9": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 5,
+            "red": 15
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    },
+    "level10": {
+        "specialpower": "2-1",
+        "condition": {
+            "yellow": 3,
+            "red": 10
+        },
+        "enemy_bases": [
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 653,
+                    "y": 960
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            },
+            {
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 500,
+                    "y": 500
+                },
+                "base_score": 1500,
+                "node_score": 200,
+                "sprite_area": {
+                    "x": 120,
+                    "y": 55,
+                    "w": 79,
+                    "h": 66
+                }
+            }
+        ],
+        "enemies": [
+            {
+                "type": "1-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 734,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 757,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "1-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 779,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-a",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 801,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-b",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 824,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "2-c",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 846,
+                    "y": 960
+                },
+                "score": 40
+            },
+            {
+                "type": "mine",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 868,
+                    "y": 960
+                },
+                "score": 10
+            },
+            {
+                "type": "i",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 892,
+                    "y": 960
+                },
+                "score": 50
+            },
+            {
+                "type": "p",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 914,
+                    "y": 960
+                },
+                "score": 60
+            },
+            {
+                "type": "e",
+                "image": "assets/img/naves.png",
+                "position": {
+                    "x": 935,
+                    "y": 960
+                },
+                "score": 70
+            }
+        ]
+    }
+}

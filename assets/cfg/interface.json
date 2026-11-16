@@ -72,7 +72,8 @@
             "size": {"w": 72, "h": 90},
             "color": {"r": 144, "g": 144, "b": 255},
             "dot_size": {"w": 2, "h": 2},
-            "player_color": {"r": 255, "g": 255, "b": 255}
+            "player_color": {"r": 255, "g": 255, "b": 255},
+            "base_color": {"r": 0, "g": 255, "b": 0}
         },
         "lives": {
             "image": "assets/img/naves.png",
