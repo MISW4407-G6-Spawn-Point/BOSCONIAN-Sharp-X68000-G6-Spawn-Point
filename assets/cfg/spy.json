@@ -1,0 +1,15 @@
+{
+    "image": "assets/img/naves.png",
+    "area": {"x": 56, "y": 112, "w": 11, "h": 13},
+    "hitbox": {"w": 9, "h": 11},
+    "speed_factor": 1.4,
+    "spread": 25,
+    "interval": 20,
+    "score_steps": [
+        {"max_distance": 60, "score": 200},
+        {"max_distance": 100, "score": 400},
+        {"max_distance": 140, "score": 800},
+        {"score": 1600}
+    ],
+    "escape_sound": "assets/snd/laser.ogg"
+}

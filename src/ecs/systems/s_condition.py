@@ -57,6 +57,8 @@ def system_condition(world: esper.World, delta_time: float) -> None:
 
 def reset_condition(world: esper.World) -> None:
     for _, condition in world.get_component(CConditionDisplay):
+        if condition.phase == "RED":
+            continue
         condition.elapsed_time = 0.0
         condition.phase = ""
     system_condition(world, 0.0)

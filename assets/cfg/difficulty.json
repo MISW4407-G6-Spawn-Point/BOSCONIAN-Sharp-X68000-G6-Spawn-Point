@@ -1,0 +1,15 @@
+{
+    "enemy_spawn": {
+        "interval":    {"start": 2.5, "per_round": -0.18, "limit": 0.8},
+        "max_enemies": {"start": 6,   "per_round": 1,     "limit": 15},
+        "accuracy":    {"start": 1.0, "per_round": 0.1,   "limit": 2.0}
+    },
+    "formation_interval": {"start": 30, "per_round": -2, "limit": 12},
+    "spy_chance": {"start": 0.35, "per_round": 0.05, "limit": 0.8},
+    "obstacles_multiplier": {"start": 1.0, "per_round": 0.2, "limit": 3.0},
+    "bases": {
+        "count": {"start": 2, "per_round": 1, "limit": 8},
+        "safe_radius": 220,
+        "min_distance": 330
+    }
+}

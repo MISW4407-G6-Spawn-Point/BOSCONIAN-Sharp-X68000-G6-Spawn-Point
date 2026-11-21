@@ -1,0 +1,19 @@
+{
+    "image": "assets/img/naves.png",
+    "safe_radius": 140,
+    "min_gap": 8,
+    "types": {
+        "1-a":  {"score": 10},
+        "1-b":  {"score": 10},
+        "1-c":  {"score": 10},
+        "2-a":  {"score": 10},
+        "2-b":  {"score": 10},
+        "2-c":  {"score": 10},
+        "mine": {"score": 20, "sprite_area": {"x": 0, "y": 87, "w": 16, "h": 15}}
+    },
+    "default_counts": {
+        "1-a": 12, "1-b": 12, "1-c": 12,
+        "2-a": 12, "2-b": 12, "2-c": 12,
+        "mine": 16
+    }
+}

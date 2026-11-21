@@ -14,3 +14,4 @@ class CPlayerShip:
         self.speed = 0.0
         self.dir_index = start_dir
         self.input = pygame.Vector2(0, 0)
+        self.active = True

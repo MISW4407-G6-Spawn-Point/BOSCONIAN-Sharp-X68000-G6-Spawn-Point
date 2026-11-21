@@ -5,6 +5,7 @@ from src.create.prefab_creator import (create_hud, create_input_title, create_lo
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_scene_timer import system_scene_timer
+from src.ecs.systems.s_score_display import system_score_display
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
 from src.ecs.systems.s_movement import system_movement
@@ -17,13 +18,16 @@ class TitleScene(Scene):
         world_cfg = ServiceLocator.configs_service.get("assets/cfg/world.json")
         scenes_cfg = ServiceLocator.configs_service.get("assets/cfg/scenes.json")
         font = interface_cfg["font"]
-        self._next_scene = scenes_cfg["TITLE_SCENE"]["next_scene"]
+        self._start_scene = scenes_cfg["TITLE_SCENE"]["start_scene"]
         self._play_area = interface_cfg["play_area"]
+        # Volver al titulo siempre empieza una partida nueva
+        session = self._game_engine.session
+        session.new_game()
 
         create_starfield(self.ecs_world, world_cfg, interface_cfg["play_area"], in_menu=True)
         create_logo(self.ecs_world, interface_cfg["title_scene"]["logo"])
         create_texts(self.ecs_world, interface_cfg["title_scene"]["texts"], font)
-        create_hud(self.ecs_world, interface_cfg["hud"], font)
+        create_hud(self.ecs_world, interface_cfg["hud"], font, None, 0, 1, session.hi_score)
         create_scene_timer(self.ecs_world, scenes_cfg["TITLE_SCENE"])
         create_input_title(self.ecs_world)
 
@@ -31,8 +35,9 @@ class TitleScene(Scene):
         system_blink(self.ecs_world, delta_time)
         system_movement(self.ecs_world, delta_time)
         system_star_wrap(self.ecs_world, self._play_area)
+        system_score_display(self.ecs_world)
         system_scene_timer(self.ecs_world, delta_time, self.switch_scene)
 
     def do_action(self, action:CInputCommand):
         if action.name == "START_GAME" and action.phase == CommandPhase.STARTED:
-            self.switch_scene(self._next_scene)
+            self.switch_scene(self._start_scene)

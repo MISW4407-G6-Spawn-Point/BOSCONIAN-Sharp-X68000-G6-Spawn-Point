@@ -1,0 +1,73 @@
+{
+    "image": "assets/img/naves.png",
+    "types": {
+        "i": {
+            "area": {"x": 0, "y": 111, "w": 14, "h": 14},
+            "hitbox": {"w": 10, "h": 10},
+            "score": 50,
+            "speed_factor": 1.15,
+            "turn_rate": 120,
+            "behaviour": "chase_then_leave",
+            "chase_time": 6.0
+        },
+        "p": {
+            "area": {"x": 20, "y": 113, "w": 13, "h": 12},
+            "hitbox": {"w": 9, "h": 8},
+            "score": 60,
+            "speed_factor": 1.1,
+            "turn_rate": 140,
+            "behaviour": "chase_then_wander",
+            "chase_time": 2.0,
+            "wander_interval": 0.8
+        },
+        "e": {
+            "area": {"x": 41, "y": 109, "w": 7, "h": 16},
+            "hitbox": {"w": 6, "h": 10},
+            "score": 70,
+            "speed_factor": 1.6,
+            "turn_rate": 0,
+            "behaviour": "straight"
+        }
+    },
+    "default_spawn": {
+        "interval": 2.5,
+        "max_enemies": 6,
+        "accuracy": 1.0,
+        "weights": {"i": 3, "p": 2, "e": 1}
+    },
+    "spawn_distance": 170,
+    "despawn_distance": 420,
+    "red_speed_multiplier": 2.0,
+    "red_rate_multiplier": 2.0,
+
+    "formation": {
+        "captain_type": "i",
+        "captain_score": 90,
+        "member_types": ["i", "p", "e"],
+        "bonus": 1500,
+        "spacing": 14,
+        "speed_factor": 1.25,
+        "turn_rate": 70,
+        "shapes": {
+            "I": [[-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0]],
+            "V": [[0, -1], [-1, 0], [1, 0], [-2, 1], [2, 1]],
+            "X": [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1]],
+            "+": [[0, 0], [0, -1], [0, 1], [-1, 0], [1, 0]]
+        }
+    },
+    "spy": {
+        "area": {"x": 56, "y": 112, "w": 11, "h": 13},
+        "hitbox": {"w": 9, "h": 10},
+        "speed_factor": 1.6,
+        "interval": 20,
+        "chance": 0.6,
+        "timeout": 8,
+        "score_steps": [
+            {"distance": 0, "score": 200},
+            {"distance": 60, "score": 400},
+            {"distance": 100, "score": 800},
+            {"distance": 140, "score": 1600}
+        ],
+        "sound_escape": "assets/snd/laser.ogg"
+    }
+}
