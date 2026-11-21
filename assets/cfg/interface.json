@@ -49,6 +49,58 @@
         "blink_time": 0,
         "hide_world": false
     },
+    "game_over_scene": {
+        "texts": [
+            {"text": "GAME  OVER", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 100}},
+            {"text": "TO CONTINUE GAME", "size": 8, "color": {"r": 40, "g": 150, "b": 255}, "position": {"x": 120, "y": 124}},
+            {"text": "PUSH BUTTON", "size": 8, "color": {"r": 40, "g": 150, "b": 255}, "position": {"x": 120, "y": 140}},
+            {"text": "BEFORE TIME COUNT ENTERS 0.", "size": 8, "color": {"r": 40, "g": 150, "b": 255}, "position": {"x": 120, "y": 156}},
+            {"text": "TIME", "size": 8, "color": {"r": 255, "g": 96, "b": 96}, "position": {"x": 112, "y": 176}}
+        ],
+        "countdown": {"size": 8, "color": {"r": 255, "g": 96, "b": 96}, "position": {"x": 148, "y": 176}}
+    },
+    "victory_scene": {
+        "texts": [
+            {"text": "CONGRATULATIONS!", "size": 8, "color": {"r": 255, "g": 200, "b": 0}, "position": {"x": 120, "y": 72}},
+            {"text": "ALL ROUNDS CLEAR", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 92}},
+            {"text": "PRESS Z", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 180}}
+        ],
+        "stats": {"size": 8, "color": {"r": 255, "g": 255, "b": 255}, "x": 120, "y": 120, "line_height": 14,
+                  "lines": ["SCORE {score}", "LIVES LOST {lives_lost}", "CONTINUES {continues}"]}
+    },
+    "alerts": {
+        "cover": {"position": {"x": 244, "y": 72}, "size": {"w": 72, "h": 30}, "color": {"r": 0, "g": 0, "b": 0}},
+        "text_x": 280,
+        "text_y": 74,
+        "line_height": 13,
+        "size": 8,
+        "formation": {"lines": ["FORMATION", "ATTACK!"], "color": {"r": 255, "g": 90, "b": 90}},
+        "spy": {"lines": ["SPY SHIP", "SIGHTED"], "color": {"r": 255, "g": 90, "b": 90}}
+    },
+    "score_popup": {"size": 8, "color": {"r": 255, "g": 255, "b": 255}, "duration": 1.2},
+    "score_table_scene": {
+        "title": {"text": "SCORE TABLE", "size": 8, "color": {"r": 255, "g": 210, "b": 120}, "position": {"x": 120, "y": 24}},
+        "rows": [
+            {"area": {"x": 148, "y": 9, "w": 15, "h": 11}, "text": "ASTEROID    10PTS"},
+            {"area": {"x": 0, "y": 87, "w": 15, "h": 15}, "text": "COSMO MINE  20PTS"},
+            {"area": {"x": 0, "y": 111, "w": 14, "h": 14}, "text": "I-TYPE      50PTS"},
+            {"area": {"x": 20, "y": 113, "w": 13, "h": 12}, "text": "P-TYPE      60PTS"},
+            {"area": {"x": 41, "y": 109, "w": 7, "h": 16}, "text": "E-TYPE      70PTS"},
+            {"area": {"x": 56, "y": 112, "w": 11, "h": 13}, "text": "SPY SHIP   ???PTS"}
+        ],
+        "image": "assets/img/naves.png",
+        "icon_x": 30,
+        "text_x": 48,
+        "row_y": 52,
+        "row_step": 24,
+        "size": 8,
+        "color": {"r": 255, "g": 255, "b": 255},
+        "footer": [
+            {"text": "AND BOSCONIAN BASE", "size": 8, "color": {"r": 60, "g": 230, "b": 140}, "position": {"x": 120, "y": 200}},
+            {"text": "CANNON  200PTS", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 214}},
+            {"text": "CORE  1500PTS", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 226}}
+        ]
+    },
     "hud": {
         "texts": [
             {"text": "HI-SCORE", "size": 8, "color": {"r": 220, "g": 0, "b": 0}, "position": {"x": 244, "y": 10}, "align": "left"},
@@ -79,6 +131,7 @@
             "image": "assets/img/naves.png",
             "area": {"x": 124, "y": 7, "w": 15, "h": 18},
             "count": 3,
+            "max_icons": 4,
             "position": {"x": 244, "y": 208},
             "spacing": 3
         }

@@ -9,6 +9,7 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.systems.s_condition import reset_condition
+from src.create.prefab_creator import create_score_popup
 
 
 _DESTRUCTIBLE_TYPES = {
@@ -22,6 +23,7 @@ _DESTRUCTIBLE_TYPES = {
     "p",
     "e",
     "mine",
+    "spy",
 }
 
 
@@ -120,6 +122,7 @@ def system_collision_bullet_level_object(
             if hit_index == -1:
                 _explode_base(world, base_origin, base_combat, explosion_cfg)
                 _add_score(world, base_object.score)
+                create_score_popup(world, base_origin + pygame.Vector2(49, 40), base_object.score)
                 world.delete_entity(bullet_entity)
                 world.delete_entity(base_entity)
                 reset_condition(world)
@@ -136,6 +139,7 @@ def system_collision_bullet_level_object(
                 if base_combat.has_been_destroyed():
                     _explode_base(world, base_origin, base_combat, explosion_cfg)
                     _add_score(world, base_object.score)
+                    create_score_popup(world, base_origin + pygame.Vector2(49, 40), base_object.score)
                     world.delete_entity(base_entity)
                     reset_condition(world)
                 elif new_damage >= 3:
@@ -166,6 +170,8 @@ def system_collision_bullet_level_object(
                 explosion_cfg,
             )
             _add_score(world, level_object.score)
+            if level_object.object_type == "spy":
+                create_score_popup(world, pygame.Vector2(object_rect.center), level_object.score)
             impacted_objects.add(object_entity)
             impacted_bullets.add(bullet_entity)
             world.delete_entity(bullet_entity)

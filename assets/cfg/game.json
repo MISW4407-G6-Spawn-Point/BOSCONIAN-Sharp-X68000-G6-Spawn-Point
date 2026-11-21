@@ -1,0 +1,7 @@
+{
+    "lives": 3,
+    "hi_score": 20000,
+    "extra_life": {"first": 50000, "second": 100000, "every": 100000},
+    "continue_time": 5,
+    "sound_extra_life": "assets/snd/laser.ogg"
+}
