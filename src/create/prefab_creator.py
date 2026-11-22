@@ -28,6 +28,20 @@ from src.ecs.components.c_sprite_animation import CSpriteAnimation
 from src.ecs.components.tags.c_tag_hide_on_pause import CTagHideOnPause
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.create.enemy_base_composer import enemy_base_composer
+from src.ecs.components.c_enemy_spawner import CEnemySpawner
+from src.ecs.components.c_enemy_state import CEnemyState
+from src.ecs.components.c_hitbox import CHitBox
+from src.ecs.components.c_player_state import CPlayerState
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_hi_score import CTagHiScore
+from src.ecs.components.tags.c_tag_life_icon import CTagLifeIcon
+from src.ecs.components.c_formation_group import CFormationGroup
+from src.ecs.components.c_formation_leader import CFormationLeader
+from src.ecs.components.c_formation_member import CFormationMember
+from src.ecs.components.c_score_popup import CScorePopup
+from src.ecs.components.c_spy import CSpy
+from src.ecs.components.c_timed_spawner import CTimedSpawner
+from src.ecs.components.tags.c_tag_alert_overlay import CTagAlertOverlay
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -204,8 +218,11 @@ def _create_enemy_base_object(
     return entity
 
 
-def create_level_objects(world:esper.World, level_cfg:dict) -> list[int]:
-    """Crea las bases y enemigos configurados en el nivel seleccionado."""
+def create_level_objects(world:esper.World, level_cfg:dict, obstacles_cfg:dict = None,
+                         world_size:dict = None, safe_center:dict = None) -> list[int]:
+    """Crea las bases (posicion fija del nivel) y los obstaculos.
+    Si se pasa obstacles_cfg, rocas y minas se reparten al azar por el mundo,
+    lejos de safe_center (inicio del jugador). Si no, se usa la lista fija 'enemies'."""
     created_entities = []
     enemy_base_configs = level_cfg["enemy_bases"]
     if isinstance(enemy_base_configs, dict):
@@ -222,6 +239,13 @@ def create_level_objects(world:esper.World, level_cfg:dict) -> list[int]:
             99,
             80,
         ))
+
+    if obstacles_cfg is not None:
+        counts = level_cfg.get("obstacles", obstacles_cfg["default_counts"])
+        created_entities += create_random_obstacles(world, obstacles_cfg, counts, world_size,
+                                                    safe_center, occupied_rectangles)
+        return created_entities
+
     for enemy_cfg in level_cfg["enemies"]:
         sprite_area = enemy_cfg.get(
             "sprite_area",
@@ -250,6 +274,65 @@ def create_level_objects(world:esper.World, level_cfg:dict) -> list[int]:
             ))
 
     return created_entities
+
+
+def create_random_obstacles(world:esper.World, obstacles_cfg:dict, counts:dict,
+                            world_size:dict, safe_center:dict,
+                            occupied_rectangles:list) -> list[int]:
+    """Reparte obstaculos por tipo en posiciones al azar del mundo, no pone dentro de safe_radius del inicio ni encima de otro"""
+    created_entities = []
+    center = pygame.Vector2(safe_center["x"], safe_center["y"])
+    gap = obstacles_cfg["min_gap"]
+    for obstacle_type, count in counts.items():
+        type_cfg = obstacles_cfg["types"][obstacle_type]
+        area = type_cfg.get("sprite_area", _LEVEL_SPRITE_AREAS[obstacle_type])
+        for _ in range(count):
+            for _attempt in range(50):
+                pos = pygame.Vector2(random.uniform(0, world_size["w"] - area["w"]),
+                                     random.uniform(0, world_size["h"] - area["h"]))
+                rect = pygame.Rect(pos, (area["w"], area["h"]))
+                if _wrapped_distance(pygame.Vector2(rect.center), center,
+                                     world_size) < obstacles_cfg["safe_radius"]:
+                    continue
+                if rect.inflate(gap * 2, gap * 2).collidelist(occupied_rectangles) != -1:
+                    continue
+                occupied_rectangles.append(rect)
+                object_cfg = {"image": obstacles_cfg["image"], "sprite_area": area,
+                              "score": type_cfg["score"],
+                              "position": {"x": pos.x, "y": pos.y}}
+                if obstacle_type == "mine":
+                    created_entities.append(_create_mine_object(world, object_cfg))
+                else:
+                    created_entities.append(_create_level_object(
+                        world, object_cfg, obstacle_type, type_cfg["score"]))
+                break
+    return created_entities
+
+
+def random_base_positions(count:int, world_size:dict, safe_center:dict, safe_radius:float,
+                          min_distance:float) -> list:
+    """Centros al azar para 'count' bases: lejos del inicio del jugador y separadas entre si
+    (contando el wraparound). Si no caben todas, devuelve las que logro ubicar."""
+    center = pygame.Vector2(safe_center["x"], safe_center["y"])
+    positions = []
+    for _ in range(count):
+        for _attempt in range(200):
+            pos = pygame.Vector2(random.uniform(60, world_size["w"] - 60),
+                                 random.uniform(50, world_size["h"] - 50))
+            if _wrapped_distance(pos, center, world_size) < safe_radius:
+                continue
+            if any(_wrapped_distance(pos, other, world_size) < min_distance for other in positions):
+                continue
+            positions.append(pos)
+            break
+    return [{"x": round(p.x), "y": round(p.y)} for p in positions]
+
+
+def _wrapped_distance(a:pygame.Vector2, b:pygame.Vector2, world_size:dict) -> float:
+    """Distancia mas corta entre dos puntos en un mundo que se repite (wraparound)."""
+    dx = abs(a.x - b.x) % world_size["w"]
+    dy = abs(a.y - b.y) % world_size["h"]
+    return pygame.Vector2(min(dx, world_size["w"] - dx), min(dy, world_size["h"] - dy)).length()
 
 
 def _anchor(position:pygame.Vector2, size:pygame.Vector2, align:str) -> pygame.Vector2:
@@ -285,7 +368,8 @@ def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: di
     entity = create_sprite(world, position, pygame.Vector2(0, 0), first_frame)
     world.add_component(entity, CExplosion(frames, explosion_cfg["frame_duration"]))
     world.add_component(entity, CTagWorld())
-    ServiceLocator.sounds_service.play(explosion_cfg["sound"])
+    if explosion_cfg.get("sound"):
+        ServiceLocator.sounds_service.play(explosion_cfg["sound"])
     return entity
 
 
@@ -335,6 +419,8 @@ def create_hud(
     condition_cfg:dict = None,
     initial_score: int = 0,
     round_number: int = 1,
+    hi_score: int = None,
+    reserve_lives: int = None,
 ) -> None:
     """Panel derecho: record, puntaje, condicion, radar, vidas y ronda."""
     score_entity = None
@@ -349,7 +435,9 @@ def create_hud(
             text_cfg["position"],
             text_cfg.get("align", "center"),
         )
-        if index == 3:
+        if index == 1:
+            hi_score_entity = created_text_entity
+        elif index == 3:
             score_entity = created_text_entity
         elif index == 6:
             round_entity = created_text_entity
@@ -377,6 +465,19 @@ def create_hud(
         initial_score,
     )
     world.add_component(score_entity, score_display)
+    if hi_score is not None:
+        hi_cfg = hud_cfg["texts"][1]
+        world.add_component(hi_score_entity, CScoreDisplay(
+            hi_cfg["position"]["x"],
+            hi_cfg["position"]["y"] + hi_cfg["size"] / 2,
+            font_path,
+            hi_cfg["size"],
+            _color(hi_cfg["color"]),
+            hi_score,
+            tracks_score=False,
+        ))
+        world.add_component(hi_score_entity, CTagHiScore())
+
     round_cfg = hud_cfg["texts"][6]
     world.add_component(round_entity, CScoreDisplay(
         round_cfg["position"]["x"],
@@ -412,13 +513,17 @@ def create_hud(
     sheet = ServiceLocator.images_service.get(lives["image"])
     area = lives["area"]
     icon = sheet.subsurface(pygame.Rect(area["x"], area["y"], area["w"], area["h"]))
-    for i in range(lives["count"]):
+    visible = lives["count"] if reserve_lives is None else reserve_lives
+    for i in range(lives.get("max_icons", lives["count"])):
         life_entity = world.create_entity()
         pos = pygame.Vector2(lives["position"]["x"] + i * (area["w"] + lives["spacing"]),
                         lives["position"]["y"])
-        world.add_component(life_entity, CSurface.from_surface(icon))
+        icon_surface = icon.copy()
+        icon_surface.set_alpha(255 if i < visible else 0)
+        world.add_component(life_entity, CSurface.from_surface(icon_surface))
         world.add_component(life_entity, CTransform(pos))
         world.add_component(life_entity, CTagUI(1))
+        world.add_component(life_entity, CTagLifeIcon(i))
 
 
 def create_boot_cursor(world:esper.World, cursor_cfg:dict) -> int:
@@ -485,6 +590,9 @@ def create_input_play(world:esper.World):
         ("PLAYER_SPECIAL", pygame.K_x),
         ("PAUSE", pygame.K_p),
         ("BACK_TO_TITLE", pygame.K_ESCAPE),
+        ("CHEAT_NEXT_LEVEL", pygame.K_F1),
+        ("CHEAT_GOD_MODE", pygame.K_F2),
+        ("CHEAT_RED_ALERT", pygame.K_F3),
     ]
     for name, key in commands:
         input_entity = world.create_entity()
@@ -506,6 +614,10 @@ def create_player_ship(world:esper.World, player_cfg:dict, start_pos:dict) -> in
     world.add_component(player_entity, CTagWorld())
     world.add_component(player_entity, CPlayerShip(sprites, player_cfg["max_speed"],
                                                    player_cfg["acceleration"], start_dir))
+
+    world.add_component(player_entity, CHitBox(player_cfg["hitbox"]))
+    world.add_component(player_entity, CPlayerState(player_cfg["death"]["respawn_time"]))
+
     return player_entity
 
 
@@ -569,3 +681,194 @@ def create_pause_text(world:esper.World, pause_cfg:dict, font_path:str) -> int:
         world.add_component(text_entity, CBlink(c_s.surf, pause_cfg["blink_time"]))
     world.add_component(text_entity, CTagPause())
     return text_entity
+
+
+
+def create_enemy(world:esper.World, pos:pygame.Vector2, enemy_type:str, enemies_cfg:dict,
+                 heading:pygame.Vector2, speed:float, accuracy:float) -> int:
+    """Enemigo I, P o E. Sale con 'heading' (hacia el jugador); luego lo maneja system_enemy_state.
+    Lleva CLevelObject para que la colision de balas existente lo destruya y sume puntos"""
+    enemy_cfg = enemies_cfg["types"][enemy_type]
+    sheet = ServiceLocator.images_service.get(enemies_cfg["image"])
+    area = enemy_cfg["area"]
+    base = sheet.subsurface(pygame.Rect(area["x"], area["y"], area["w"], area["h"]))
+    sprites = [pygame.transform.rotate(base, -45 * i) for i in range(8)]
+
+    surface = sprites[0]
+    enemy_entity = create_sprite(world, pos - pygame.Vector2(surface.get_size()) / 2,
+                                 heading * speed, surface)
+    world.add_component(enemy_entity, CTagWorld())
+    world.add_component(enemy_entity, CTagEnemy())
+    world.add_component(enemy_entity, CLevelObject(enemy_type, enemy_cfg["score"]))
+    world.add_component(enemy_entity, CHitBox(enemy_cfg["hitbox"]))
+    world.add_component(enemy_entity, CEnemyState(enemy_cfg, sprites, heading, speed, accuracy))
+    return enemy_entity
+
+
+def create_enemy_spawner(world:esper.World, spawn_cfg:dict) -> int:
+    spawner_entity = world.create_entity()
+    world.add_component(spawner_entity, CEnemySpawner(spawn_cfg))
+    return spawner_entity
+
+
+def create_death_explosions(world:esper.World, center:pygame.Vector2, death_cfg:dict,
+                            explosion_cfg:dict) -> None:
+    """Muerte del jugador: varias explosiones alrededor de la nave"""
+    quiet_cfg = dict(explosion_cfg)
+    for i in range(death_cfg["explosions"]):
+        offset = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1)) * death_cfg["radius"]
+        create_explosion(world, center + offset, explosion_cfg if i == 0 else quiet_cfg)
+        quiet_cfg["sound"] = None
+
+
+def create_input_continue(world:esper.World):
+    input_entity = world.create_entity()
+    world.add_component(input_entity, CInputCommand("CONTINUE", pygame.K_z))
+
+
+
+
+def _rotated_sprites(image_path:str, area:dict) -> list:
+    """Los 8 sprites pre-rotados (0 = arriba, sentido horario), como la nave del jugador."""
+    sheet = ServiceLocator.images_service.get(image_path)
+    base = sheet.subsurface(pygame.Rect(area["x"], area["y"], area["w"], area["h"]))
+    return [pygame.transform.rotate(base, -45 * i) for i in range(8)]
+
+
+def _center_of(world:esper.World, entity:int) -> pygame.Vector2:
+    c_t = world.component_for_entity(entity, CTransform)
+    c_s = world.component_for_entity(entity, CSurface)
+    return c_t.pos + pygame.Vector2(c_s.area.size) / 2
+
+
+def create_timed_spawner(world:esper.World, kind:str, interval:float, chance:float = 1.0) -> int:
+    spawner_entity = world.create_entity()
+    world.add_component(spawner_entity, CTimedSpawner(kind, interval, chance))
+    return spawner_entity
+
+
+def create_formation(world:esper.World, player_entity:int, formations_cfg:dict,
+                     enemies_cfg:dict, player_speed:float) -> int:
+    """Ataque en formacion: un capitan + 4 naves con una figura al azar (I, V, X, +).
+    Sale desde una base enemiga (si quedan) y va directo hacia el jugador."""
+    from src.ecs.systems.s_enemy_state import shortest_delta
+    world_cfg = ServiceLocator.configs_service.get("assets/cfg/world.json")
+    radar_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")["hud"]["radar"]
+    world_size = world_cfg["world_size"]
+
+    bases = [entity for entity, _ in world.get_component(CEnemyBaseCombat)]
+    player_center = _center_of(world, player_entity)
+    if bases:
+        origin = _center_of(world, random.choice(bases))
+    else:
+        origin = player_center + pygame.Vector2(enemies_cfg["spawn_distance"], 0).rotate(
+            random.uniform(0, 360))
+    heading = shortest_delta(origin, player_center, world_size)
+    heading = heading.normalize() if heading.length_squared() > 0 else pygame.Vector2(0, -1)
+    rotation = pygame.Vector2(0, -1).angle_to(heading)
+    speed = player_speed * formations_cfg["speed_factor"]
+
+    shape = formations_cfg["shapes"][random.choice(list(formations_cfg["shapes"].keys()))]
+    member_type = random.choice(formations_cfg["member_types"])
+    image = enemies_cfg["image"]
+
+    leader_cfg = formations_cfg["leader"]
+    leader_sprites = _rotated_sprites(image, leader_cfg["area"])
+    leader = create_sprite(world, origin - pygame.Vector2(leader_sprites[0].get_size()) / 2,
+                           heading * speed, leader_sprites[0])
+    world.add_component(leader, CTagWorld())
+    world.add_component(leader, CLevelObject(leader_cfg["type"], leader_cfg["score"]))
+    world.add_component(leader, CHitBox(leader_cfg["hitbox"]))
+    world.add_component(leader, CFormationLeader(heading, speed, formations_cfg["turn_rate"],
+                                                 leader_sprites))
+    create_radar_dot(world, leader, radar_cfg["dot_size"], formations_cfg["radar_color"])
+
+    # Las otras 4 naves
+    member_cfg = enemies_cfg["types"][member_type]
+    member_sprites = _rotated_sprites(image, member_cfg["area"])
+    members = [leader]
+    for offset in shape:
+        if offset == [0, 0]:
+            continue
+        local = pygame.Vector2(offset[0], offset[1])
+        center = origin + (local * formations_cfg["spacing"]).rotate(rotation)
+        member = create_sprite(world, center - pygame.Vector2(member_sprites[0].get_size()) / 2,
+                               heading * speed, member_sprites[0])
+        world.add_component(member, CTagWorld())
+        world.add_component(member, CLevelObject(member_type, member_cfg["score"]))
+        world.add_component(member, CHitBox(member_cfg["hitbox"]))
+        world.add_component(member, CFormationMember(leader, local, member_sprites,
+                                                     player_speed * formations_cfg["flee_speed_factor"]))
+        members.append(member)
+
+    group_entity = world.create_entity()
+    world.add_component(group_entity, CFormationGroup(members, formations_cfg["bonus_all"]))
+    return group_entity
+
+
+def create_spy(world:esper.World, player_entity:int, camera, spy_cfg:dict,
+               player_speed:float) -> int:
+    """Espia: entra por un borde de la pantalla y la cruza cerca del jugador"""
+    sprites = _rotated_sprites(spy_cfg["image"], spy_cfg["area"])
+    view_size = pygame.Vector2(camera.view.size)
+    side = random.choice(("left", "right", "top", "bottom"))
+    if side == "left":
+        local = pygame.Vector2(4, random.uniform(0.2, 0.8) * view_size.y)
+    elif side == "right":
+        local = pygame.Vector2(view_size.x - 16, random.uniform(0.2, 0.8) * view_size.y)
+    elif side == "top":
+        local = pygame.Vector2(random.uniform(0.2, 0.8) * view_size.x, 4)
+    else:
+        local = pygame.Vector2(random.uniform(0.2, 0.8) * view_size.x, view_size.y - 16)
+    pos = camera.pos + local
+    heading = (_center_of(world, player_entity) - pos).rotate(
+        random.uniform(-spy_cfg["spread"], spy_cfg["spread"]))
+    heading = heading.normalize() if heading.length_squared() > 0 else pygame.Vector2(1, 0)
+
+    angle = pygame.Vector2(0, -1).angle_to(heading) % 360
+    surface = sprites[round(angle / 45) % 8]
+    spy_entity = create_sprite(world, pos, heading * player_speed * spy_cfg["speed_factor"], surface)
+    world.add_component(spy_entity, CTagWorld())
+    world.add_component(spy_entity, CTagEnemy())
+    world.add_component(spy_entity, CLevelObject("spy", spy_cfg["score_steps"][0]["score"]))
+    world.add_component(spy_entity, CHitBox(spy_cfg["hitbox"]))
+    world.add_component(spy_entity, CSpy(heading, player_speed * spy_cfg["speed_factor"],
+                                         spy_cfg["score_steps"]))
+    return spy_entity
+
+
+def create_score_popup(world:esper.World, center:pygame.Vector2, points:int) -> int:
+    """Numero de puntaje (ej. 1500) en el mundo donde se destruyo algo grande."""
+    interface_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")
+    popup_cfg = interface_cfg["score_popup"]
+    font = ServiceLocator.fonts_service.get(interface_cfg["font"], popup_cfg["size"])
+    surface = font.render(str(points), True, _color(popup_cfg["color"]))
+    popup_entity = create_sprite(world, center - pygame.Vector2(surface.get_size()) / 2,
+                                 pygame.Vector2(0, 0), surface)
+    world.add_component(popup_entity, CTagWorld())
+    world.add_component(popup_entity, CScorePopup(popup_cfg["duration"]))
+    return popup_entity
+
+
+def create_alert_overlay(world:esper.World, alerts_cfg:dict, alert_cfg:dict,
+                         font_path:str, kind:str) -> None:
+    """Fondo negro sobre CONDITION + las lineas del aviso (FORMATION / ATTACK!)"""
+    cover = alerts_cfg["cover"]
+    cover_entity = create_rect(world, cover["position"], cover["size"], cover["color"], layer=3)
+    world.add_component(cover_entity, CTagAlertOverlay(kind))
+    for i, line in enumerate(alert_cfg["lines"]):
+        pos = {"x": alerts_cfg["text_x"], "y": alerts_cfg["text_y"] + i * alerts_cfg["line_height"]}
+        text_entity = create_text(world, line, font_path, alerts_cfg["size"],
+                                  alert_cfg["color"], pos, layer=4)
+        world.add_component(text_entity, CTagAlertOverlay(kind))
+
+
+def create_icon(world:esper.World, image_path:str, area:dict, center:dict) -> int:
+    """Sprite fijo de interfaz"""
+    surface = _create_level_surface(image_path, area)
+    icon_entity = world.create_entity()
+    world.add_component(icon_entity, CSurface.from_surface(surface))
+    world.add_component(icon_entity, CTransform(
+        pygame.Vector2(center["x"], center["y"]) - pygame.Vector2(surface.get_size()) / 2))
+    world.add_component(icon_entity, CTagUI(1))
+    return icon_entity

@@ -2,28 +2,36 @@
 
 import pygame
 
-from src.create.prefab_creator import (create_camera, create_hud, create_input_play,
-                                       create_level_objects,
+from src.create.prefab_creator import (create_camera, create_enemy_spawner, create_hud,
+                                       create_input_play, create_level_objects,
                                        create_pause_text, create_player_bullets,
                                        create_player_ship, create_radar_dot,
-                                       create_starfield)
+                                       create_starfield,
+                                       create_timed_spawner, random_base_positions)
 from src.ecs.components.c_camera import CCamera
-from src.ecs.components.c_input_command import CInputCommand, CommandPhase
-from src.ecs.components.c_player_ship import CPlayerShip
-from src.ecs.components.c_level_object import CLevelObject
+from src.ecs.components.c_condition_display import CConditionDisplay
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
-from src.ecs.components.c_score_display import CScoreDisplay
+from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.ecs.components.c_level_object import CLevelObject
+from src.ecs.components.c_player_ship import CPlayerShip
+from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_bullet_screen import system_bullet_screen
 from src.ecs.systems.s_camera import system_camera
-from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_collision_bullet_level_object import system_collision_bullet_level_object
+from src.ecs.systems.s_collision_player import system_collision_player
+from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
+from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
+from src.ecs.systems.s_enemy_state import system_enemy_state
 from src.ecs.systems.s_explosion import system_explosion
+from src.ecs.systems.s_hi_score import system_hi_score
+from src.ecs.systems.s_lives_hud import system_lives_hud
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_player_ship import system_player_ship
+from src.ecs.systems.s_player_state import kill_player, respawn_player, system_player_state
 from src.ecs.systems.s_radar import system_radar
 from src.ecs.systems.s_rendering import system_rendering
 from src.ecs.systems.s_score_display import system_score_display
@@ -33,6 +41,11 @@ from src.ecs.systems.s_star_wrap import system_star_wrap
 from src.ecs.systems.s_world_wrap import system_world_wrap
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
+from src.ecs.systems.s_alert_overlay import system_alert_overlay
+from src.ecs.systems.s_formation import system_formation
+from src.ecs.systems.s_score_popup import system_score_popup
+from src.ecs.systems.s_spy import system_spy
+from src.ecs.systems.s_timed_spawner import system_timed_spawner
 
 # Comando -> eje que suma a la entrada de la nave
 _DIRECTION_INPUTS = {
@@ -46,41 +59,47 @@ _DIRECTION_INPUTS = {
 class PlayScene(Scene):
     def __init__(self, game_engine):
         super().__init__(game_engine)
-        self._level_index = 1
-        self._score = 0
+        # nivel, puntaje, vidas y record viven en la sesion (sobreviven entre escenas)
+        self._session = game_engine.session
+        self._god_mode = False
 
     def do_create(self):
         interface_cfg = ServiceLocator.configs_service.get("assets/cfg/interface.json")
         world_cfg = ServiceLocator.configs_service.get("assets/cfg/world.json")
         scenes_cfg = ServiceLocator.configs_service.get("assets/cfg/scenes.json")
         levels_cfg = ServiceLocator.configs_service.get("assets/cfg/level.json")
-        level_name = f"round{self._level_index}"
-        if level_name not in levels_cfg:
-            level_name = f"level{self._level_index}"
-        if level_name not in levels_cfg:
-            self._level_index = 1
-            level_name = "round1"
-            if level_name not in levels_cfg:
-                level_name = "level1"
-        self._level_cfg = levels_cfg[level_name]
-        player_cfg = ServiceLocator.configs_service.get("assets/cfg/player.json")
+        self._level_cfg = levels_cfg[self._level_name(levels_cfg)]
+        self._player_cfg = ServiceLocator.configs_service.get("assets/cfg/player.json")
+        self._game_cfg = ServiceLocator.configs_service.get("assets/cfg/game.json")
+        self._enemies_cfg = ServiceLocator.configs_service.get("assets/cfg/enemies.json")
         self._bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
         self._explosion_cfg = ServiceLocator.configs_service.get(
             "assets/cfg/explosion.json"
         )
-        self._back_scene = scenes_cfg["PLAY_SCENE"]["back_scene"]
+        self._scenes_cfg = scenes_cfg["PLAY_SCENE"]
+        self._levels_cfg = levels_cfg
         self._play_area = interface_cfg["play_area"]
         self._world_size = world_cfg["world_size"]
+        self._player_start = world_cfg["player_start"]
         self._radar_cfg = interface_cfg["hud"]["radar"]
         self._pause_cfg = interface_cfg["pause"]
         self._font = interface_cfg["font"]
+        self._alerts_cfg = interface_cfg["alerts"]
+        self._formations_cfg = ServiceLocator.configs_service.get("assets/cfg/formations.json")
+        self._spy_cfg = ServiceLocator.configs_service.get("assets/cfg/spy.json")
         self._paused = False
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
-        self._player_entity = create_player_ship(self.ecs_world, player_cfg,
-                                                 world_cfg["player_start"])
-        level_entities = create_level_objects(self.ecs_world, self._level_cfg)
+        self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
+                                                 self._player_start)
+        obstacles_cfg = ServiceLocator.configs_service.get("assets/cfg/obstacles.json")
+        self._difficulty_cfg = ServiceLocator.configs_service.get("assets/cfg/difficulty.json")
+        level_with_obstacles = dict(self._level_cfg)
+        level_with_obstacles.setdefault("obstacles", self._scaled_obstacles(obstacles_cfg))
+        level_with_obstacles["enemy_bases"] = self._random_bases()
+        level_entities = create_level_objects(self.ecs_world, level_with_obstacles, obstacles_cfg,self._world_size, self._player_start)
         self._p_ship = self.ecs_world.component_for_entity(self._player_entity, CPlayerShip)
+        self._p_state = self.ecs_world.component_for_entity(self._player_entity, CPlayerState)
         camera_entity = create_camera(self.ecs_world, self._player_entity,
                                       self._play_area, self._world_size)
         self._camera = self.ecs_world.component_for_entity(camera_entity, CCamera)
@@ -89,8 +108,10 @@ class PlayScene(Scene):
             interface_cfg["hud"],
             interface_cfg["font"],
             self._level_cfg["condition"],
-            self._score,
-            self._level_index,
+            self._session.score,
+            self._session.level,
+            self._session.hi_score,
+            self._session.lives,
         )
         create_radar_dot(self.ecs_world, self._player_entity,
                          self._radar_cfg["dot_size"], self._radar_cfg["player_color"])
@@ -103,9 +124,59 @@ class PlayScene(Scene):
                     self._radar_cfg["dot_size"],
                     self._radar_cfg["base_color"],
                 )
+        # cada nivel puede traer su "enemy_spawn"; si no, se usa el de enemies.json
+        create_enemy_spawner(self.ecs_world, self._level_cfg.get(
+            "enemy_spawn", self._scaled_enemy_spawn()))
+        # Ataques en formacion y espia (cada vez mas frecuentes segun la ronda)
+        create_timed_spawner(self.ecs_world, "formation",
+                             self._scaled(self._difficulty_cfg["formation_interval"]))
+        create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
+                             self._scaled(self._difficulty_cfg["spy_chance"]))
         create_input_play(self.ecs_world)
         system_camera(self.ecs_world)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
+
+    def _scaled(self, rule:dict) -> float:
+        """start + per_round * (ronda - 1), sin pasar de limit (hacia arriba o hacia abajo)."""
+        value = rule["start"] + rule["per_round"] * (self._session.level - 1)
+        return max(value, rule["limit"]) if rule["per_round"] < 0 else min(value, rule["limit"])
+
+    def _scaled_enemy_spawn(self) -> dict:
+        """Cada ronda salen enemigos mas seguido, mas a la vez y apuntan mejor."""
+        spawn_cfg = dict(self._enemies_cfg["default_spawn"])
+        rules = self._difficulty_cfg["enemy_spawn"]
+        spawn_cfg["interval"] = self._scaled(rules["interval"])
+        spawn_cfg["max_enemies"] = round(self._scaled(rules["max_enemies"]))
+        spawn_cfg["accuracy"] = self._scaled(rules["accuracy"])
+        return spawn_cfg
+
+    def _random_bases(self) -> list:
+        """Cada ronda hay mas bases, en posiciones al azar. Se usa la primera base del
+        nivel como plantilla (imagen y puntajes)."""
+        template = self._level_cfg["enemy_bases"]
+        template = template[0] if isinstance(template, list) else template
+        rules = self._difficulty_cfg["bases"]
+        positions = random_base_positions(round(self._scaled(rules["count"])), self._world_size,
+                                          self._player_start, rules["safe_radius"],
+                                          rules["min_distance"])
+        return [dict(template, position=position) for position in positions]
+
+    def _scaled_obstacles(self, obstacles_cfg:dict) -> dict:
+        """Cada ronda hay mas rocas y minas (default_counts * multiplicador)."""
+        mult = self._scaled(self._difficulty_cfg["obstacles_multiplier"])
+        return {obstacle_type: round(count * mult)
+                for obstacle_type, count in obstacles_cfg["default_counts"].items()}
+
+    def _level_name(self, levels_cfg:dict) -> str:
+        for name in (f"round{self._session.level}", f"level{self._session.level}"):
+            if name in levels_cfg:
+                return name
+        self._session.level = 1
+        return "round1" if "round1" in levels_cfg else "level1"
+
+    def _has_next_level(self) -> bool:
+        next_level = self._session.level + 1
+        return f"round{next_level}" in self._levels_cfg or f"level{next_level}" in self._levels_cfg
 
     def do_update(self, delta_time:float):
         system_blink(self.ecs_world, delta_time)
@@ -115,23 +186,69 @@ class PlayScene(Scene):
         system_enemy_base_eye(self.ecs_world, delta_time)
         system_sprite_animation(self.ecs_world, delta_time)
         system_player_ship(self.ecs_world, delta_time)
+        system_enemy_spawner(self.ecs_world, self._player_entity, self._enemies_cfg,
+                             self._world_size, self._player_cfg["max_speed"], delta_time)
+        system_enemy_state(self.ecs_world, self._player_entity, self._world_size,
+                           self._enemies_cfg["despawn_distance"], delta_time)
+        system_timed_spawner(self.ecs_world, self._player_entity, self._camera,
+                             self._formations_cfg, self._spy_cfg, self._enemies_cfg,
+                             self._player_cfg["max_speed"], delta_time)
+        system_formation(self.ecs_world, self._player_entity, self._world_size,
+                         self._formations_cfg["spacing"],
+                         self._enemies_cfg["despawn_distance"], delta_time)
+        system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size,
+                   self._spy_cfg["escape_sound"])
         system_movement(self.ecs_world, delta_time)
         system_collision_bullet_level_object(
             self.ecs_world,
             self._explosion_cfg,
         )
+        if not self._god_mode:
+            system_collision_player(self.ecs_world, self._player_entity,
+                                    self._explosion_cfg, self._on_player_hit)
+        system_player_state(self.ecs_world, self._player_entity, delta_time,
+                            self._on_player_respawn)
         system_explosion(self.ecs_world, delta_time)
+        system_score_popup(self.ecs_world, delta_time)
+        system_alert_overlay(self.ecs_world, self._alerts_cfg, self._font)
+        self._update_score()
         system_score_display(self.ecs_world)
+        system_lives_hud(self.ecs_world, self._session.lives)
         if not self.ecs_world.get_component(CEnemyBaseCombat):
-            self._score = self._current_score()
-            self._level_index += 1
-            self.switch_scene("PLAY_SCENE")
+            self._next_level()
         system_world_wrap(self.ecs_world, self._world_size["w"], self._world_size["h"])
         system_camera(self.ecs_world)
         system_star_parallax(self.ecs_world, self._camera.delta)
         system_star_wrap(self.ecs_world, self._play_area)
         system_bullet_screen(self.ecs_world, self._camera)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
+
+    def _update_score(self):
+        score = system_hi_score(self.ecs_world)
+        if self._session.update_score(score):
+            ServiceLocator.sounds_service.play(self._game_cfg["sound_extra_life"])
+
+    def _next_level(self):
+        if self._has_next_level():
+            self._session.level += 1
+            self.switch_scene("PLAY_SCENE")
+        else:
+            self.switch_scene(self._scenes_cfg["victory_scene"])
+
+    def _on_player_hit(self):
+        kill_player(self.ecs_world, self._player_entity,
+                    self._player_cfg["death"], self._explosion_cfg)
+
+    def _on_player_respawn(self):
+        """Si quedan vidas de reserva, reaparece; si no, GAME OVER."""
+        if self._session.lives > 0:
+            self._session.lives -= 1
+            self._session.lives_lost += 1
+            respawn_player(self.ecs_world, self._player_entity, self._player_start)
+        else:
+            self._session.lives_lost += 1
+            self._p_state.timer = float("inf")  # evita pedir el cambio mas de una vez
+            self.switch_scene(self._scenes_cfg["game_over_scene"])
 
     def do_draw(self, screen:pygame.Surface):
         hide_world = self._paused and self._pause_cfg["hide_world"]
@@ -147,13 +264,12 @@ class PlayScene(Scene):
 
     def do_action(self, action:CInputCommand):
         if action.name == "BACK_TO_TITLE" and action.phase == CommandPhase.STARTED:
-            self.switch_scene(self._back_scene)
+            self.switch_scene(self._scenes_cfg["back_scene"])
             return
 
         if action.name == "PAUSE" and action.phase == CommandPhase.STARTED:
             self._toggle_pause()
             return
-
 
         if action.name in _DIRECTION_INPUTS:
             axis = _DIRECTION_INPUTS[action.name]
@@ -163,16 +279,19 @@ class PlayScene(Scene):
                 self._p_ship.input -= axis
             return
 
-        if self._paused:
+        if self._paused or action.phase != CommandPhase.STARTED:
             return
 
-        if action.name == "PLAYER_FIRE" and action.phase == CommandPhase.STARTED:
+        if action.name == "PLAYER_FIRE" and self._p_state.state == PlayerState.ALIVE:
             num_bullets = len(self.ecs_world.get_component(CTagBullet))
             if num_bullets + 2 <= self._bullet_cfg["max_bullets"]:
                 create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg)
 
-    def _current_score(self) -> int:
-        for _, score_display in self.ecs_world.get_component(CScoreDisplay):
-            if score_display.tracks_score:
-                return score_display.value
-        return self._score
+        # --- Modo trampa (ver README) ---
+        elif action.name == "CHEAT_NEXT_LEVEL":
+            self._next_level()
+        elif action.name == "CHEAT_GOD_MODE":
+            self._god_mode = not self._god_mode
+        elif action.name == "CHEAT_RED_ALERT":
+            for _, condition in self.ecs_world.get_component(CConditionDisplay):
+                condition.elapsed_time = max(condition.elapsed_time, condition.red_time)

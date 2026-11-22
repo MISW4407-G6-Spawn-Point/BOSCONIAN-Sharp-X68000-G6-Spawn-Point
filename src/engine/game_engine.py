@@ -10,6 +10,10 @@ from src.game.boot_scene import BootScene
 from src.game.title_scene import TitleScene
 from src.game.level_scene import LevelScene
 from src.game.play_scene import PlayScene
+from src.engine.game_session import GameSession
+from src.game.game_over_scene import GameOverScene
+from src.game.victory_scene import VictoryScene
+from src.game.score_table_scene import ScoreTableScene
 
 
 class GameEngine:
@@ -29,12 +33,18 @@ class GameEngine:
                                     self.window_cfg["bg_color"]["g"],
                                     self.window_cfg["bg_color"]["b"])
 
+        # Datos de la partida (nivel, puntaje, vidas, record)
+        self.session = GameSession(ServiceLocator.configs_service.get("assets/cfg/game.json"))
+
         # Patron Escena: todas las escenas registradas por nombre
         self._scenes:dict[str, Scene] = {}
         self._scenes["BOOT_SCENE"] = BootScene(self)
         self._scenes["TITLE_SCENE"] = TitleScene(self)
         self._scenes["LEVEL_SCENE"] = LevelScene(self)
         self._scenes["PLAY_SCENE"] = PlayScene(self)
+        self._scenes["GAME_OVER_SCENE"] = GameOverScene(self)
+        self._scenes["VICTORY_SCENE"] = VictoryScene(self)
+        self._scenes["SCORE_TABLE_SCENE"] = ScoreTableScene(self)
         self._current_scene:Scene = None
         self._scene_name_to_switch:str = None
 

@@ -3,5 +3,7 @@
     "area": {"x": 124, "y": 7, "w": 15, "h": 18},
     "max_speed": 75,
     "acceleration": 40,
-    "start_direction": 0
+    "start_direction": 0,
+    "hitbox": {"w": 9, "h": 9},
+    "death": {"explosions": 5, "radius": 10, "respawn_time": 2.5}
 }

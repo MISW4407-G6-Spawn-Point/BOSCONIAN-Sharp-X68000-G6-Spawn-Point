@@ -5,13 +5,29 @@
     },
     "TITLE_SCENE": {
         "duration": 6.0,
-        "next_scene": "LEVEL_SCENE"
+        "next_scene": "SCORE_TABLE_SCENE",
+        "start_scene": "LEVEL_SCENE"
+    },
+    "SCORE_TABLE_SCENE": {
+        "duration": 6.0,
+        "next_scene": "TITLE_SCENE",
+        "start_scene": "LEVEL_SCENE"
     },
     "LEVEL_SCENE": {
         "duration": 3.0,
         "next_scene": "PLAY_SCENE"
     },
     "PLAY_SCENE": {
-        "back_scene": "TITLE_SCENE"
+        "back_scene": "TITLE_SCENE",
+        "game_over_scene": "GAME_OVER_SCENE",
+        "victory_scene": "VICTORY_SCENE"
+    },
+    "GAME_OVER_SCENE": {
+        "next_scene": "TITLE_SCENE",
+        "continue_scene": "PLAY_SCENE"
+    },
+    "VICTORY_SCENE": {
+        "duration": 15.0,
+        "next_scene": "TITLE_SCENE"
     }
 }

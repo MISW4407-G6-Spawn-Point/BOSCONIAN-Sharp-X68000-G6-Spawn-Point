@@ -23,6 +23,10 @@ def system_player_ship(world:esper.World, delta_time:float):
     c_s:CSurface
     c_p:CPlayerShip
     for _, (c_t, c_v, c_s, c_p) in components:
+        if not c_p.active:
+            c_v.vel = pygame.Vector2(0, 0)
+            continue
+
         if c_p.input.length_squared() > 0:
             new_index = _input_to_index(c_p.input)
             if new_index != c_p.dir_index:
