@@ -257,8 +257,10 @@ class PlayScene(Scene):
     def _toggle_pause(self):
         self._paused = not self._paused
         if self._paused:
+            ServiceLocator.sounds_service.pause_music()
             create_pause_text(self.ecs_world, self._pause_cfg, self._font)
         else:
+            ServiceLocator.sounds_service.unpause_music()
             for entity, _ in self.ecs_world.get_component(CTagPause):
                 self.ecs_world.delete_entity(entity)
 

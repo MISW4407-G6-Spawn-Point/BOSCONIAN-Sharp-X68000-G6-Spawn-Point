@@ -1,0 +1,10 @@
+{
+    "scenes": {
+        "TITLE_SCENE":       {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},
+        "SCORE_TABLE_SCENE": {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},
+        "LEVEL_SCENE":       {"track": "assets/mus/starshooterv2.1.ogg", "volume": 0.4},
+        "PLAY_SCENE":        {"track": "assets/mus/starshooterv2.1.ogg", "volume": 0.4},
+        "GAME_OVER_SCENE":   {"track": "assets/mus/night_tune3.ogg", "volume": 0.5},
+        "VICTORY_SCENE":     {"track": "assets/mus/exploratig_the_cosmos_1_sub_38_bit.ogg", "volume": 0.5}
+    }
+}
