@@ -1,0 +1,4 @@
+{
+    "uses_per_level": 2,
+    "targets": ["1-a", "1-b", "1-c", "2-a", "2-b", "2-c", "i", "p", "e", "mine", "spy"]
+}

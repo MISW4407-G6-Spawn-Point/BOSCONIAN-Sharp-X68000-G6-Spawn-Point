@@ -46,6 +46,8 @@ from src.ecs.systems.s_formation import system_formation
 from src.ecs.systems.s_score_popup import system_score_popup
 from src.ecs.systems.s_spy import system_spy
 from src.ecs.systems.s_timed_spawner import system_timed_spawner
+from src.ecs.components.c_special_power import CSpecialPower
+from src.ecs.systems.s_special_power import system_special_power, system_special_power
 
 # Comando -> eje que suma a la entrada de la nave
 _DIRECTION_INPUTS = {
@@ -76,6 +78,7 @@ class PlayScene(Scene):
         self._explosion_cfg = ServiceLocator.configs_service.get(
             "assets/cfg/explosion.json"
         )
+        self._special_cfg = ServiceLocator.configs_service.get("assets/cfg/special.json")
         self._scenes_cfg = scenes_cfg["PLAY_SCENE"]
         self._levels_cfg = levels_cfg
         self._play_area = interface_cfg["play_area"]
@@ -91,7 +94,9 @@ class PlayScene(Scene):
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
         self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
-                                                 self._player_start)
+                                                self._player_start)
+        self.ecs_world.add_component(self._player_entity,
+                                    CSpecialPower(self._special_cfg["uses_per_level"]))
         obstacles_cfg = ServiceLocator.configs_service.get("assets/cfg/obstacles.json")
         self._difficulty_cfg = ServiceLocator.configs_service.get("assets/cfg/difficulty.json")
         level_with_obstacles = dict(self._level_cfg)
@@ -289,6 +294,9 @@ class PlayScene(Scene):
             if num_bullets + 2 <= self._bullet_cfg["max_bullets"]:
                 create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg)
 
+        elif action.name == "PLAYER_SPECIAL" and self._p_state.state == PlayerState.ALIVE:
+            system_special_power(self.ecs_world, self._player_entity, self._camera,
+                                self._special_cfg, self._explosion_cfg)
         # --- Modo trampa (ver README) ---
         elif action.name == "CHEAT_NEXT_LEVEL":
             self._next_level()
