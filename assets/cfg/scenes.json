@@ -24,10 +24,16 @@
     },
     "GAME_OVER_SCENE": {
         "next_scene": "TITLE_SCENE",
+        "record_scene": "HI_SCORE_SCENE",
         "continue_scene": "PLAY_SCENE"
     },
     "VICTORY_SCENE": {
         "duration": 15.0,
+        "next_scene": "TITLE_SCENE",
+        "record_scene": "HI_SCORE_SCENE"
+    },
+    "HI_SCORE_SCENE": {
+        "duration": 8.0,
         "next_scene": "TITLE_SCENE"
     }
 }

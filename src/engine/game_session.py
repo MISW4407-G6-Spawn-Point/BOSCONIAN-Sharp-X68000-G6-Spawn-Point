@@ -1,12 +1,18 @@
+from src.engine.service_locator import ServiceLocator
+
+
 class GameSession:
     """Datos que sobreviven entre escenas: nivel, puntaje, vidas y record"""
 
     def __init__(self, game_cfg:dict) -> None:
         self._cfg = game_cfg
-        self.hi_score = game_cfg["hi_score"]
+        self.hi_score = ServiceLocator.save_service.load_hi_score(game_cfg["hi_score"])
+        self._saved_hi_score = self.hi_score
         self.new_game()
 
     def new_game(self):
+        self.save_record()
+        self.record_at_start = self.hi_score
         self.level = 1
         self.score = 0
         self.lives = self._cfg["lives"]
@@ -16,10 +22,22 @@ class GameSession:
 
     def continue_game(self):
         """Continuar: recupera todas las vidas y pierde todo el puntaje (mismo lvl)"""
+        self.save_record()
         self.score = 0
         self.lives = self._cfg["lives"]
         self.continues += 1
         self.next_extra_life = self._cfg["extra_life"]["first"]
+
+    def is_new_record(self) -> bool:
+        """En esta partida se supero el record que habia al empezar
+        (cuenta tambien lo logrado antes de continuar)"""
+        return self.hi_score > self.record_at_start
+
+    def save_record(self):
+        """Escribe el record solo si cambio desde la ultima vez"""
+        if self.hi_score > self._saved_hi_score:
+            ServiceLocator.save_service.save_hi_score(self.hi_score)
+            self._saved_hi_score = self.hi_score
 
     def update_score(self, score:int) -> bool:
         """Actualiza puntaje y record y devuelve True si se gano una vida extra"""

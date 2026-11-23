@@ -1,6 +1,7 @@
 from src.engine.services.configs_service import ConfigsService
 from src.engine.services.fonts_service import FontsService
 from src.engine.services.images_service import ImagesService
+from src.engine.services.save_service import SaveService
 from src.engine.services.sounds_service import SoundService
 
 
@@ -10,3 +11,4 @@ class ServiceLocator:
     fonts_service = FontsService()
     images_service = ImagesService()
     sounds_service = SoundService()
+    save_service = SaveService()

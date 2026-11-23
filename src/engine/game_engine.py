@@ -14,6 +14,7 @@ from src.engine.game_session import GameSession
 from src.game.game_over_scene import GameOverScene
 from src.game.victory_scene import VictoryScene
 from src.game.score_table_scene import ScoreTableScene
+from src.game.hi_score_scene import HiScoreScene
 
 
 class GameEngine:
@@ -45,6 +46,7 @@ class GameEngine:
         self._scenes["GAME_OVER_SCENE"] = GameOverScene(self)
         self._scenes["VICTORY_SCENE"] = VictoryScene(self)
         self._scenes["SCORE_TABLE_SCENE"] = ScoreTableScene(self)
+        self._scenes["HI_SCORE_SCENE"] = HiScoreScene(self)
         self._current_scene:Scene = None
         self._scene_name_to_switch:str = None
 

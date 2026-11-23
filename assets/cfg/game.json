@@ -1,6 +1,8 @@
 {
     "lives": 3,
     "hi_score": 20000,
+    "save_file": "save/hi_score.json",
+    "save_key": "bosconian_g6_hi_score",
     "extra_life": {"first": 50000, "second": 100000, "every": 100000},
     "continue_time": 5,
     "sound_extra_life": "assets/snd/laser.ogg"

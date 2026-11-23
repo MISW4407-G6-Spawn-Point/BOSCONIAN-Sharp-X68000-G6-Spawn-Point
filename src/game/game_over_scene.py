@@ -53,7 +53,11 @@ class GameOverScene(Scene):
         self._countdown.value = max(0, math.ceil(self._time))
         system_score_display(self.ecs_world)
         if self._time <= 0:
-            self.switch_scene(self._scene_cfg["next_scene"])
+            # game over definitivo: guarda el record y felicita si se supero
+            session = self._game_engine.session
+            session.save_record()
+            self.switch_scene(self._scene_cfg["record_scene"] if session.is_new_record()
+                              else self._scene_cfg["next_scene"])
 
     def do_action(self, action:CInputCommand):
         if action.name == "CONTINUE" and action.phase == CommandPhase.STARTED:

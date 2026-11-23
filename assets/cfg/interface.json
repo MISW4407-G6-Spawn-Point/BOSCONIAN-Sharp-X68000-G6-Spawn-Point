@@ -76,6 +76,15 @@
         "stats": {"size": 8, "color": {"r": 255, "g": 255, "b": 255}, "x": 120, "y": 120, "line_height": 14,
                   "lines": ["SCORE {score}", "LIVES LOST {lives_lost}", "CONTINUES {continues}"]}
     },
+    "hi_score_scene": {
+        "sound": "assets/snd/record_horn.mp3",
+        "texts": [
+            {"text": "CONGRATULATIONS!", "size": 8, "color": {"r": 255, "g": 200, "b": 0}, "position": {"x": 120, "y": 72}, "blink_time": 0.4},
+            {"text": "NEW HI-SCORE", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 100}},
+            {"text": "{hi_score}", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 124}},
+            {"text": "PRESS Z", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 180}, "blink_time": 0.5}
+        ]
+    },
     "alerts": {
         "cover": {"position": {"x": 244, "y": 72}, "size": {"w": 72, "h": 30}, "color": {"r": 0, "g": 0, "b": 0}},
         "text_x": 280,

@@ -20,7 +20,11 @@ class VictoryScene(Scene):
         font = interface_cfg["font"]
         session = self._game_engine.session
         victory_cfg = interface_cfg["victory_scene"]
-        self._next_scene = scenes_cfg["VICTORY_SCENE"]["next_scene"]
+        scene_cfg = scenes_cfg["VICTORY_SCENE"]
+        # con record nuevo pasa por la escena de felicitacion
+        self._next_scene = scene_cfg["record_scene"] if session.is_new_record() \
+            else scene_cfg["next_scene"]
+        session.save_record()
         self._play_area = interface_cfg["play_area"]
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=True)
@@ -35,7 +39,7 @@ class VictoryScene(Scene):
         for i, line in enumerate(stats["lines"]):
             create_text(self.ecs_world, line.format(**values), font, stats["size"],
                         stats["color"], {"x": stats["x"], "y": stats["y"] + i * stats["line_height"]})
-        create_scene_timer(self.ecs_world, scenes_cfg["VICTORY_SCENE"])
+        create_scene_timer(self.ecs_world, dict(scene_cfg, next_scene=self._next_scene))
         create_input_continue(self.ecs_world)
 
     def do_update(self, delta_time:float):
