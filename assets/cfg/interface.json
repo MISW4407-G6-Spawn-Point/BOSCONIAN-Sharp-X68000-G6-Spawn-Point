@@ -27,6 +27,7 @@
         },
         "texts": [
             {"text": "STAR DESTROYER", "size": 8, "color": {"r": 200, "g": 0, "b": 0}, "position": {"x": 120, "y": 96}},
+            {"text": "I: HOW TO PLAY  C: CREDITS", "size": 8, "color": {"r": 160, "g": 160, "b": 160}, "position": {"x": 120, "y": 24}},
             {"text": "© 1981 NAMCO", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 176}},
             {"text": "ARRANGED BY", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 194}},
             {"text": "DEMPA", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 205}},
@@ -39,6 +40,86 @@
         "texts": [
             {"text": "LEVEL 1", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 104}},
             {"text": "AROUND THE PLANET RED.", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 124}}
+        ]
+    },
+    "instructions_scene": {
+        "title": {"text": "HOW TO PLAY", "size": 8, "color": {"r": 255, "g": 210, "b": 120}, "position": {"x": 120, "y": 24}},
+        "size": 8,
+        "color": {"r": 255, "g": 255, "b": 255},
+        "align": "left",
+        "line_x": 12,
+        "line_y": 48,
+        "line_height": 12,
+        "page_time": 7.0,
+        "page_marker": {"text": "{page}/{total}", "color": {"r": 160, "g": 160, "b": 160}, "position": {"x": 120, "y": 236}},
+        "pages": [
+            {"lines": [
+                    "DESTROY ALL ENEMY BASES",
+                    "TO CLEAR EACH ROUND.",
+                    "",
+                    "SHOOT ITS 6 CANNONS OR HIT",
+                    "THE OPEN CORE ON ITS AXIS.",
+                    "",
+                    "ARROWS  TURN / MOVE",
+                    "Z       FIRE",
+                    "X       SPECIAL ATTACK",
+                    "P       PAUSE",
+                    "ESC     BACK TO TITLE"
+            ]},
+            {"lines": [
+                    "CONDITION",
+                    "GREEN   ALL CLEAR",
+                    "YELLOW  ENEMIES ATTACK",
+                    "RED     FULL ALERT!",
+                    "",
+                    "EXTRA SHIP AT 50000,",
+                    "100000 AND EVERY 100000.",
+                    "",
+                    "FROM ROUND 2 THE SHIP",
+                    "FIRES A SPECIAL WEAPON:",
+                    "3 SHOTS AHEAD, 1 BEHIND."
+            ]}
+        ]
+    },
+    "credits_scene": {
+        "title": {"text": "CREDITS", "size": 8, "color": {"r": 255, "g": 210, "b": 120}, "position": {"x": 120, "y": 24}},
+        "size": 8,
+        "color": {"r": 255, "g": 255, "b": 255},
+        "align": "center",
+        "line_x": 120,
+        "line_y": 48,
+        "line_height": 12,
+        "page_time": 7.0,
+        "page_marker": {"text": "{page}/{total}", "color": {"r": 160, "g": 160, "b": 160}, "position": {"x": 120, "y": 236}},
+        "pages": [
+            {"color": {"r": 60, "g": 120, "b": 255}, "lines": [
+                    "G6 SPAWN POINT",
+                    "SANTIAGO BERNAL GONZALEZ",
+                    "MARIA A. SANABRIA SALAZAR",
+                    "AMELIA SERRANO ARANGO",
+                    "KEVIN ANDRES CASTILLO PEÑA",
+                    "",
+                    "ORIGINAL GAME",
+                    "BOSCONIAN (C) NAMCO",
+                    "X68000 BY DEMPA 1988",
+                    "FAN REMAKE FOR EDUCATION"
+            ]},
+            {"color": {"r": 60, "g": 120, "b": 255}, "lines": [
+                    "MUSIC",
+                    "CENTURION OF WAR",
+                    "OPENGAMEART.ORG - CC0",
+                    "",
+                    "GRAPHICS",
+                    "DIANA PACHECO - CC-BY-4.0",
+                    "",
+                    "FONT",
+                    "PRESS START 2P BY CODEMAN38",
+                    "SIL OFL 1.1",
+                    "",
+                    "SOUND EFFECTS - PIXABAY",
+                    "WESLEYEXTREME_GAMER",
+                    "DRAGON-STUDIO AND OTHERS"
+            ]}
         ]
     },
     "pause": {

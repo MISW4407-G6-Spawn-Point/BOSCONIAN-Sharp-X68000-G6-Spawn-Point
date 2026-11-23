@@ -29,3 +29,18 @@ Stack: Python + Pygame-CE + Esper 2.5 · Resolución: 256x208
 pip install -r requirements.txt
 python main.py           (escritorio)
 python -m pygbag .       (navegador, http://localhost:8000)
+
+## Controles y mecánicas
+| Tecla | Acción |
+|-------|--------|
+| Flechas | Girar / mover la nave (8 direcciones) |
+| Z | Disparar |
+| X | Poder especial |
+| P | Pausa |
+| ESC | Volver al título (en juego y desde instrucciones/créditos) |
+| Enter / Z (menús) | Empezar partida |
+| I (título) | Instrucciones (HOW TO PLAY) |
+| C (título) | Créditos |
+| F1 / F2 / F3 | Trampas: siguiente nivel / invencible / alerta roja |
+
+- **Habilidad especial por nivel:** en el nivel 1 la nave dispara 2 balas (adelante y atrás); desde el nivel 2 (`"special_shot": true` en `assets/cfg/level.json`) dispara 4: 3 al frente en abanico (separación `special_spread` de `bullet.json`) y 1 atrás. Al iniciar esos niveles aparece el aviso "SPECIAL WEAPON!".

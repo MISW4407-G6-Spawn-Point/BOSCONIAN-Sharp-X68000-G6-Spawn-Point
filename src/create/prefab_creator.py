@@ -601,9 +601,17 @@ def create_scene_timer(world:esper.World, scene_cfg:dict) -> int:
 
 
 def create_input_title(world:esper.World):
-    input_start = world.create_entity()
-    world.add_component(input_start,
-                        CInputCommand("START_GAME", pygame.K_RETURN))
+    """Menus: Enter/Z empieza, I instrucciones, C creditos, ESC vuelve al titulo"""
+    commands = [
+        ("START_GAME", pygame.K_RETURN),
+        ("START_GAME", pygame.K_z),
+        ("SHOW_INSTRUCTIONS", pygame.K_i),
+        ("SHOW_CREDITS", pygame.K_c),
+        ("BACK_TO_TITLE", pygame.K_ESCAPE),
+    ]
+    for name, key in commands:
+        input_entity = world.create_entity()
+        world.add_component(input_entity, CInputCommand(name, key))
 
 
 def create_input_play(world:esper.World):

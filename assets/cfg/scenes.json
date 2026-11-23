@@ -6,12 +6,26 @@
     "TITLE_SCENE": {
         "duration": 6.0,
         "next_scene": "SCORE_TABLE_SCENE",
-        "start_scene": "LEVEL_SCENE"
+        "start_scene": "LEVEL_SCENE",
+        "instructions_scene": "INSTRUCTIONS_SCENE",
+        "credits_scene": "CREDITS_SCENE"
     },
     "SCORE_TABLE_SCENE": {
         "duration": 6.0,
-        "next_scene": "TITLE_SCENE",
+        "next_scene": "INSTRUCTIONS_SCENE",
         "start_scene": "LEVEL_SCENE"
+    },
+    "INSTRUCTIONS_SCENE": {
+        "duration": 14.0,
+        "next_scene": "CREDITS_SCENE",
+        "start_scene": "LEVEL_SCENE",
+        "back_scene": "TITLE_SCENE"
+    },
+    "CREDITS_SCENE": {
+        "duration": 14.0,
+        "next_scene": "TITLE_SCENE",
+        "start_scene": "LEVEL_SCENE",
+        "back_scene": "TITLE_SCENE"
     },
     "LEVEL_SCENE": {
         "duration": 3.0,
