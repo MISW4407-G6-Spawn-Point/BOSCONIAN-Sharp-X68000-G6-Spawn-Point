@@ -17,6 +17,19 @@ def shortest_delta(origin:pygame.Vector2, target:pygame.Vector2,
     return pygame.Vector2((d.x + w / 2) % w - w / 2, (d.y + h / 2) % h - h / 2)
 
 
+def wrapped_overlap(a:pygame.Rect, b:pygame.Rect, world_size:dict):
+    """Si a y b se superponen (contando el wraparound), devuelve el vector minimo
+    para sacar a de b. Si no, None."""
+    d = shortest_delta(pygame.Vector2(a.center), pygame.Vector2(b.center), world_size)
+    over_x = (a.w + b.w) / 2 - abs(d.x)
+    over_y = (a.h + b.h) / 2 - abs(d.y)
+    if over_x <= 0 or over_y <= 0:
+        return None
+    if over_x < over_y:
+        return pygame.Vector2(-over_x if d.x > 0 else over_x, 0)
+    return pygame.Vector2(0, -over_y if d.y > 0 else over_y)
+
+
 def system_enemy_state(world:esper.World, player_entity:int, world_size:dict,
                        despawn_distance:float, delta_time:float):
     pl_t = world.component_for_entity(player_entity, CTransform)
@@ -42,7 +55,7 @@ def system_enemy_state(world:esper.World, player_entity:int, world_size:dict,
             _do_wander_state(c_e)
 
         c_v.vel = c_e.heading * c_e.speed
-        _update_sprite(c_t, c_s, c_e)
+        update_enemy_sprite(c_t, c_s, c_e)
 
 
 def _do_chase_state(c_e:CEnemyState, to_player:pygame.Vector2, delta_time:float):
@@ -70,7 +83,7 @@ def _steer(c_e:CEnemyState, desired:pygame.Vector2, delta_time:float):
     c_e.heading = c_e.heading.rotate(max(-max_turn, min(max_turn, angle)))
 
 
-def _update_sprite(c_t:CTransform, c_s:CSurface, c_e:CEnemyState):
+def update_enemy_sprite(c_t:CTransform, c_s:CSurface, c_e:CEnemyState):
     """Elige uno de los sprites segun direccion"""
     angle = math.degrees(math.atan2(c_e.heading.x, -c_e.heading.y)) % 360
     new_index = round(angle / 45) % 8

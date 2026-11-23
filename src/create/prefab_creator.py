@@ -365,14 +365,17 @@ def create_text(world:esper.World, text:str, font_path:str, size:int, color:dict
     return text_entity
 
 
-def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: dict) -> int:
+def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: dict,
+                     velocity: pygame.Vector2 = None) -> int:
+    """Explosion animada; si se pasa velocity, sigue desplazandose (la del enemigo muerto)"""
     frames = []
     for frame_area in explosion_cfg["frames"]:
         frames.append(_create_level_surface(explosion_cfg["image"], frame_area))
 
     first_frame = frames[0]
     position = center - pygame.Vector2(first_frame.get_size()) / 2
-    entity = create_sprite(world, position, pygame.Vector2(0, 0), first_frame)
+    vel = pygame.Vector2(velocity) if velocity is not None else pygame.Vector2(0, 0)
+    entity = create_sprite(world, position, vel, first_frame)
     world.add_component(entity, CExplosion(frames, explosion_cfg["frame_duration"]))
     world.add_component(entity, CTagWorld())
     if explosion_cfg.get("sound"):

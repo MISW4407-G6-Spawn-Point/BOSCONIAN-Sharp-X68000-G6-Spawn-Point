@@ -8,6 +8,7 @@ from src.ecs.components.c_base_core import CBaseCore
 from src.ecs.components.c_condition_display import CConditionDisplay
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
 from src.ecs.components.c_enemy_base_eye import CEnemyBaseEye
+from src.ecs.components.c_launched_by import CLaunchedBy
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
@@ -30,8 +31,8 @@ def system_base_core(world:esper.World, player_entity:int, world_size:dict,
     pl_s = world.component_for_entity(player_entity, CSurface)
     player_center = pl_t.pos + pygame.Vector2(pl_s.area.size) / 2
 
-    for _, (core, eye, combat, c_t) in world.get_components(CBaseCore, CEnemyBaseEye,
-                                                            CEnemyBaseCombat, CTransform):
+    for base_entity, (core, eye, combat, c_t) in world.get_components(
+            CBaseCore, CEnemyBaseEye, CEnemyBaseCombat, CTransform):
         if core.mode != "cycle":
             continue
         if combat.eye_frame_index != eye.open_frame:
@@ -48,8 +49,9 @@ def system_base_core(world:esper.World, player_entity:int, world_size:dict,
         if shortest_delta(core_center, player_center, world_size).dot(axis) < 0:
             axis = -axis
         speed = player_speed * enemies_cfg["types"]["e"]["speed_factor"]
-        create_enemy(world, core_center, "e", enemies_cfg, axis, speed,
-                     enemies_cfg["default_spawn"]["accuracy"])
+        enemy = create_enemy(world, core_center, "e", enemies_cfg, axis, speed,
+                             enemies_cfg["default_spawn"]["accuracy"])
+        world.add_component(enemy, CLaunchedBy(base_entity))
         sound = enemies_cfg.get("core_launch_sound")
         if sound and os.path.exists(sound):
             ServiceLocator.sounds_service.play(sound)

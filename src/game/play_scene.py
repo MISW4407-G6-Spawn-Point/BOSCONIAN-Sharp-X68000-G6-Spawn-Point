@@ -28,6 +28,8 @@ from src.ecs.systems.s_bullet_screen import system_bullet_screen
 from src.ecs.systems.s_camera import system_camera
 from src.ecs.systems.s_collision_bullet_level_object import system_collision_bullet_level_object
 from src.ecs.systems.s_collision_enemy_bullet import system_collision_enemy_bullet
+from src.ecs.systems.s_collision_enemy_bounce import system_collision_enemy_bounce
+from src.ecs.systems.s_collision_enemy_obstacle import system_collision_enemy_obstacle
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
@@ -228,6 +230,8 @@ class PlayScene(Scene):
                                     self._explosion_cfg, self._on_player_hit)
         system_collision_enemy_bullet(self.ecs_world, self._player_entity, self._explosion_cfg,
                                       self._god_mode, self._on_player_hit)
+        system_collision_enemy_obstacle(self.ecs_world, self._world_size, self._explosion_cfg)
+        system_collision_enemy_bounce(self.ecs_world, self._world_size)
         system_player_state(self.ecs_world, self._player_entity, delta_time,
                             self._on_player_respawn)
         system_explosion(self.ecs_world, delta_time)

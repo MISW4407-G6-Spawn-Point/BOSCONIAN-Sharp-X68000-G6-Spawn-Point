@@ -9,7 +9,9 @@ from src.ecs.components.c_level_object import CLevelObject
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
+from src.ecs.systems.s_formation import forfeit_formation_bonus
 
 # Naves enemigas (sueltas, de formacion y espia): explotan con la bala, sin puntaje
 _ENEMY_TYPES = {"i", "p", "e", "spy"}
@@ -57,7 +59,9 @@ def system_collision_enemy_bullet(world:esper.World, player_entity:int, explosio
                 continue
             world.delete_entity(bullet_entity)
             if is_enemy:
-                create_explosion(world, pygame.Vector2(obj_rect.center), explosion_cfg)
+                create_explosion(world, pygame.Vector2(obj_rect.center), explosion_cfg,
+                                 world.component_for_entity(entity, CVelocity).vel)
+                forfeit_formation_bonus(world, entity)
                 world.delete_entity(entity)
                 hit_objects.add(entity)
             break

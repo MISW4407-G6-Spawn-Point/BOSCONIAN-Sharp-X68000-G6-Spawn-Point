@@ -166,6 +166,7 @@ def system_collision_bullet_level_object(
                 world,
                 pygame.Vector2(object_rect.center),
                 explosion_cfg,
+                world.component_for_entity(object_entity, CVelocity).vel,
             )
             _add_score(world, level_object.score)
             if level_object.object_type == "spy":
