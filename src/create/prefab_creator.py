@@ -1,3 +1,4 @@
+import os
 import random
 
 import esper
@@ -45,6 +46,7 @@ from src.ecs.components.tags.c_tag_alert_overlay import CTagAlertOverlay
 from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
 from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.c_lifetime import CLifetime
+from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -680,6 +682,24 @@ def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict,
     if bullet_cfg.get("sound"):
         ServiceLocator.sounds_service.play(bullet_cfg["sound"])
     return len(angles)
+
+
+def create_enemy_bullet(world:esper.World, center:pygame.Vector2, direction:pygame.Vector2,
+                        enemy_bullet_cfg:dict) -> int:
+    """Bala de torreta: cuadrado de color que sale de center hacia direction"""
+    size = enemy_bullet_cfg["size"]
+    surface = pygame.Surface((size, size))
+    surface.fill(_color(enemy_bullet_cfg["color"]))
+    pos = center - pygame.Vector2(size, size) / 2
+    bullet_entity = create_sprite(world, pos, direction * enemy_bullet_cfg["speed"], surface)
+    world.add_component(bullet_entity, CTagEnemyBullet())
+    world.add_component(bullet_entity, CTagWorld())
+    world.add_component(bullet_entity, CLifetime(enemy_bullet_cfg["lifetime"]))
+    # el sonido es opcional: si es null o el archivo no existe, no suena
+    sound = enemy_bullet_cfg.get("sound")
+    if sound and os.path.exists(sound):
+        ServiceLocator.sounds_service.play(sound)
+    return bullet_entity
 
 def create_radar_dot(world:esper.World, target:int, size:dict, color:dict) -> int:
     """Punto del minimapa"""

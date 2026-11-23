@@ -10,6 +10,7 @@ from src.create.prefab_creator import (create_camera, create_enemy_spawner, crea
                                        create_timed_spawner, random_base_positions,
                                        create_special_hud, create_special_shot_message,
                                        player_shot_angles)
+from src.ecs.components.c_base_turrets import CBaseTurrets
 from src.ecs.components.c_camera import CCamera
 from src.ecs.components.c_condition_display import CConditionDisplay
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
@@ -20,10 +21,12 @@ from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_pause import CTagPause
+from src.ecs.systems.s_base_turrets import system_base_turrets
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_bullet_screen import system_bullet_screen
 from src.ecs.systems.s_camera import system_camera
 from src.ecs.systems.s_collision_bullet_level_object import system_collision_bullet_level_object
+from src.ecs.systems.s_collision_enemy_bullet import system_collision_enemy_bullet
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
@@ -80,6 +83,7 @@ class PlayScene(Scene):
         self._game_cfg = ServiceLocator.configs_service.get("assets/cfg/game.json")
         self._enemies_cfg = ServiceLocator.configs_service.get("assets/cfg/enemies.json")
         self._bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
+        self._enemy_bullet_cfg = self._bullet_cfg["enemy"]
         self._explosion_cfg = ServiceLocator.configs_service.get(
             "assets/cfg/explosion.json"
         )
@@ -133,6 +137,11 @@ class PlayScene(Scene):
         for entity in level_entities:
             level_object = self.ecs_world.try_component(entity, CLevelObject)
             if level_object is not None and level_object.object_type == "enemy_base":
+                # una torreta por nodo de la base
+                combat = self.ecs_world.component_for_entity(entity, CEnemyBaseCombat)
+                self.ecs_world.add_component(entity, CBaseTurrets(
+                    len(combat.node_centers), self._enemy_bullet_cfg["interval_min"],
+                    self._enemy_bullet_cfg["interval_max"]))
                 create_radar_dot(
                     self.ecs_world,
                     entity,
@@ -216,6 +225,8 @@ class PlayScene(Scene):
                          self._enemies_cfg["despawn_distance"], delta_time)
         system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size,
                    self._spy_cfg["escape_sound"])
+        system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
+                            self._enemy_bullet_cfg, delta_time)
         system_movement(self.ecs_world, delta_time)
         system_collision_bullet_level_object(
             self.ecs_world,
@@ -224,6 +235,8 @@ class PlayScene(Scene):
         if not self._god_mode:
             system_collision_player(self.ecs_world, self._player_entity,
                                     self._explosion_cfg, self._on_player_hit)
+        system_collision_enemy_bullet(self.ecs_world, self._player_entity, self._explosion_cfg,
+                                      self._god_mode, self._on_player_hit)
         system_player_state(self.ecs_world, self._player_entity, delta_time,
                             self._on_player_respawn)
         system_explosion(self.ecs_world, delta_time)
