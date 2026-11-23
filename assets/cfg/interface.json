@@ -49,6 +49,14 @@
         "blink_time": 0,
         "hide_world": false
     },
+    "special_shot_message": {
+        "text": "SPECIAL WEAPON!",
+        "size": 8,
+        "color": {"r": 255, "g": 200, "b": 0},
+        "position": {"x": 120, "y": 150},
+        "blink_time": 0.25,
+        "duration": 3
+    },
     "game_over_scene": {
         "texts": [
             {"text": "GAME  OVER", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 100}},

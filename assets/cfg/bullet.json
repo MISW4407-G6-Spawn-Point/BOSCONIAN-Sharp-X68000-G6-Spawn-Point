@@ -7,5 +7,6 @@
     },
     "velocity": 240,
     "max_bullets": 6,
+    "special_spread": 15,
     "sound": "assets/snd/laser.ogg"
 }

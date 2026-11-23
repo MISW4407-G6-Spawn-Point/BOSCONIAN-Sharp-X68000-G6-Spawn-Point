@@ -1,6 +1,6 @@
 {
     "level1": {
-        "specialpower": "1-1",
+        "special_shot": false,
         "condition": {"yellow": 8, "red": 90},
         "enemy_bases": [
             {
@@ -188,7 +188,7 @@
         ]
     },
     "level2": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 7, "red": 85},
         "enemy_bases": [
             {
@@ -316,7 +316,7 @@
         ]
     },
     "level3": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 7, "red": 80},
         "enemy_bases": [
             {
@@ -444,7 +444,7 @@
         ]
     },
     "level4": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 6, "red": 75},
         "enemy_bases": [
             {
@@ -572,7 +572,7 @@
         ]
     },
     "level5": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 6, "red": 70},
         "enemy_bases": [
             {
@@ -700,7 +700,7 @@
         ]
     },
     "level6": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 5, "red": 65},
         "enemy_bases": [
             {
@@ -828,7 +828,7 @@
         ]
     },
     "level7": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 5, "red": 60},
         "enemy_bases": [
             {
@@ -956,7 +956,7 @@
         ]
     },
     "level8": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 4, "red": 55},
         "enemy_bases": [
             {
@@ -1084,7 +1084,7 @@
         ]
     },
     "level9": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 4, "red": 50},
         "enemy_bases": [
             {
@@ -1212,7 +1212,7 @@
         ]
     },
     "level10": {
-        "specialpower": "2-1",
+        "special_shot": true,
         "condition": {"yellow": 3, "red": 45},
         "enemy_bases": [
             {

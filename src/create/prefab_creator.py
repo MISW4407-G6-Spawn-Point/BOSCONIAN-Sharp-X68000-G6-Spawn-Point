@@ -43,6 +43,8 @@ from src.ecs.components.c_spy import CSpy
 from src.ecs.components.c_timed_spawner import CTimedSpawner
 from src.ecs.components.tags.c_tag_alert_overlay import CTagAlertOverlay
 from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
+from src.ecs.components.c_player_weapon import CPlayerWeapon
+from src.ecs.components.c_lifetime import CLifetime
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -644,16 +646,31 @@ def _bullet_surface(sheet:pygame.Surface, areas:dict, dir_index:int) -> pygame.S
     return pygame.transform.flip(cut("diagonal"), True, False)  # diagonal invertida
 
 
-def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict) -> None:
-    """Disparo"""
+def player_shot_angles(world:esper.World, player_entity:int, bullet_cfg:dict) -> list:
+    """Angulos (grados, 0 arriba, sentido horario) de las balas de un disparo.
+    Normal: 1 al frente y 1 atras. Con special_shot: 3 al frente en abanico y 1 atras."""
+    p_ship = world.component_for_entity(player_entity, CPlayerShip)
+    front = 45 * p_ship.dir_index
+    back = front + 180
+    weapon = world.try_component(player_entity, CPlayerWeapon)
+    if weapon is not None and weapon.special_shot:
+        spread = bullet_cfg["special_spread"]
+        return [front, front + spread, front - spread, back]
+    return [front, back]
+
+
+def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict,
+                          angles:list) -> int:
+    """Disparo: una bala por angulo. Devuelve cuantas balas creo."""
     p_t = world.component_for_entity(player_entity, CTransform)
     p_s = world.component_for_entity(player_entity, CSurface)
-    p_ship = world.component_for_entity(player_entity, CPlayerShip)
     center = p_t.pos + pygame.Vector2(p_s.area.size) / 2
     sheet = ServiceLocator.images_service.get(bullet_cfg["image"])
 
-    for dir_index in (p_ship.dir_index, (p_ship.dir_index + 4) % 8):
-        direction = pygame.Vector2(0, -1).rotate(45 * dir_index)
+    for angle in angles:
+        direction = pygame.Vector2(0, -1).rotate(angle)
+        # sprite de la direccion (de las 8) mas cercana al angulo
+        dir_index = round(angle / 45) % 8
         surface = _bullet_surface(sheet, bullet_cfg["areas"], dir_index)
         pos = center - pygame.Vector2(surface.get_size()) / 2
         bullet_entity = create_sprite(world, pos, direction * bullet_cfg["velocity"], surface)
@@ -662,6 +679,7 @@ def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict)
 
     if bullet_cfg.get("sound"):
         ServiceLocator.sounds_service.play(bullet_cfg["sound"])
+    return len(angles)
 
 def create_radar_dot(world:esper.World, target:int, size:dict, color:dict) -> int:
     """Punto del minimapa"""
@@ -681,6 +699,18 @@ def create_pause_text(world:esper.World, pause_cfg:dict, font_path:str) -> int:
         c_s = world.component_for_entity(text_entity, CSurface)
         world.add_component(text_entity, CBlink(c_s.surf, pause_cfg["blink_time"]))
     world.add_component(text_entity, CTagPause())
+    return text_entity
+
+
+def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:
+    """Aviso de arma especial al iniciar el nivel: titila y se borra a los 'duration' segundos"""
+    text_entity = create_text(world, msg_cfg["text"], font_path, msg_cfg["size"],
+                              msg_cfg["color"], msg_cfg["position"], layer=3)
+    if msg_cfg["blink_time"] > 0:
+        c_s = world.component_for_entity(text_entity, CSurface)
+        world.add_component(text_entity, CBlink(c_s.surf, msg_cfg["blink_time"]))
+    world.add_component(text_entity, CLifetime(msg_cfg["duration"]))
+    world.add_component(text_entity, CTagHideOnPause())
     return text_entity
 
 
