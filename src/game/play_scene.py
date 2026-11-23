@@ -7,7 +7,8 @@ from src.create.prefab_creator import (create_camera, create_enemy_spawner, crea
                                        create_pause_text, create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield,
-                                       create_timed_spawner, random_base_positions)
+                                       create_timed_spawner, random_base_positions,
+                                       create_special_hud)
 from src.ecs.components.c_camera import CCamera
 from src.ecs.components.c_condition_display import CConditionDisplay
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
@@ -48,6 +49,7 @@ from src.ecs.systems.s_spy import system_spy
 from src.ecs.systems.s_timed_spawner import system_timed_spawner
 from src.ecs.components.c_special_power import CSpecialPower
 from src.ecs.systems.s_special_power import system_special_power, system_special_power
+from src.ecs.systems.s_special_hud import system_special_hud
 
 # Comando -> eje que suma a la entrada de la nave
 _DIRECTION_INPUTS = {
@@ -118,8 +120,10 @@ class PlayScene(Scene):
             self._session.hi_score,
             self._session.lives,
         )
+        create_special_hud(self.ecs_world, interface_cfg["hud"]["special"], interface_cfg["font"],
+                self._special_cfg["uses_per_level"])
         create_radar_dot(self.ecs_world, self._player_entity,
-                         self._radar_cfg["dot_size"], self._radar_cfg["player_color"])
+                        self._radar_cfg["dot_size"], self._radar_cfg["player_color"])
         for entity in level_entities:
             level_object = self.ecs_world.try_component(entity, CLevelObject)
             if level_object is not None and level_object.object_type == "enemy_base":
@@ -217,6 +221,7 @@ class PlayScene(Scene):
         system_score_popup(self.ecs_world, delta_time)
         system_alert_overlay(self.ecs_world, self._alerts_cfg, self._font)
         self._update_score()
+        system_special_hud(self.ecs_world, self._player_entity)
         system_score_display(self.ecs_world)
         system_lives_hud(self.ecs_world, self._session.lives)
         if not self.ecs_world.get_component(CEnemyBaseCombat):

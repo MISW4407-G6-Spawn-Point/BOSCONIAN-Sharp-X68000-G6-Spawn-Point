@@ -42,6 +42,7 @@ from src.ecs.components.c_score_popup import CScorePopup
 from src.ecs.components.c_spy import CSpy
 from src.ecs.components.c_timed_spawner import CTimedSpawner
 from src.ecs.components.tags.c_tag_alert_overlay import CTagAlertOverlay
+from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -872,3 +873,21 @@ def create_icon(world:esper.World, image_path:str, area:dict, center:dict) -> in
         pygame.Vector2(center["x"], center["y"]) - pygame.Vector2(surface.get_size()) / 2))
     world.add_component(icon_entity, CTagUI(1))
     return icon_entity
+
+def create_special_hud(world:esper.World, special_cfg:dict, font_path:str, uses:int) -> None:
+    """Contador del poder especial en el panel derecho (solo en la escena de juego)."""
+    create_text(world, special_cfg["text"], font_path, special_cfg["size"],
+                special_cfg["color"], special_cfg["label_position"], "left")
+    value_pos = special_cfg["value_position"]
+    value_entity = create_text(world, str(uses), font_path, special_cfg["size"],
+                            special_cfg["color"], value_pos, "right")
+    world.add_component(value_entity, CScoreDisplay(
+        value_pos["x"],
+        value_pos["y"] + special_cfg["size"] / 2,
+        font_path,
+        special_cfg["size"],
+        _color(special_cfg["color"]),
+        uses,
+        tracks_score=False,
+    ))
+    world.add_component(value_entity, CTagSpecialDisplay())
