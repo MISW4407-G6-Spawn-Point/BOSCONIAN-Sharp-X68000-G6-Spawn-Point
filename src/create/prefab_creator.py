@@ -47,6 +47,7 @@ from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
 from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.c_lifetime import CLifetime
 from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
+from src.ecs.components.c_base_core import CBaseCore
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -189,13 +190,7 @@ def _create_enemy_base_object(
         eye_frame.set_colorkey((255, 0, 255))
         eye_frames.append(eye_frame)
 
-    entity = create_sprite(
-        world,
-        pygame.Vector2(enemy_base_cfg["position"]["x"],
-                       enemy_base_cfg["position"]["y"]) - pygame.Vector2(49, 40),
-        pygame.Vector2(0, 0),
-        base_surface,
-    )
+    entity = create_sprite(world, pygame.Vector2(0, 0), pygame.Vector2(0, 0), base_surface)
     world.add_component(entity, CTagWorld())
     world.add_component(entity, CLevelObject(
         "enemy_base",
@@ -215,11 +210,20 @@ def _create_enemy_base_object(
         (left_connector, right_connector),
         eye_frames,
         node_frames,
+        orientation=enemy_base_cfg.get("orientation", "horizontal"),
     )
+    eye = CEnemyBaseEye(None, eye_frames)
+    combat.eye_frame_index = eye.open_frame
     animated_surface = combat.compose()
-    world.component_for_entity(entity, CSurface).surf = animated_surface
-    world.add_component(entity, CEnemyBaseEye(animated_surface, eye_frames))
+    eye.base_surface = animated_surface
+    c_s = world.component_for_entity(entity, CSurface)
+    c_s.surf = animated_surface
+    c_s.area = animated_surface.get_rect()
+    core = pygame.Vector2(enemy_base_cfg["position"]["x"], enemy_base_cfg["position"]["y"])
+    world.component_for_entity(entity, CTransform).pos = core - combat.get_core_offset()
+    world.add_component(entity, eye)
     world.add_component(entity, combat)
+    world.add_component(entity, CBaseCore(enemy_base_cfg.get("core_mode", "cycle")))
     return entity
 
 
@@ -237,13 +241,11 @@ def create_level_objects(world:esper.World, level_cfg:dict, obstacles_cfg:dict =
     for enemy_base_cfg in enemy_base_configs:
         enemy_base_cfg = dict(enemy_base_cfg)
         enemy_base_cfg.setdefault("sprite_area", _LEVEL_SPRITE_AREAS["enemy_base"])
-        created_entities.append(_create_enemy_base_object(world, enemy_base_cfg))
-        occupied_rectangles.append(pygame.Rect(
-            enemy_base_cfg["position"]["x"] - 49,
-            enemy_base_cfg["position"]["y"] - 40,
-            99,
-            80,
-        ))
+        base_entity = _create_enemy_base_object(world, enemy_base_cfg)
+        created_entities.append(base_entity)
+        base_pos = world.component_for_entity(base_entity, CTransform).pos
+        base_size = world.component_for_entity(base_entity, CEnemyBaseCombat).get_size()
+        occupied_rectangles.append(pygame.Rect(base_pos, base_size))
 
     if obstacles_cfg is not None:
         counts = level_cfg.get("obstacles", obstacles_cfg["default_counts"])

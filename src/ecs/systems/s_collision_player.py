@@ -46,16 +46,13 @@ def system_collision_player(world:esper.World, player_entity:int, explosion_cfg:
 
 
 def _hits_base(pl_rect:pygame.Rect, base_pos:pygame.Vector2, combat:CEnemyBaseCombat) -> bool:
-    """Misma geometria que usa la colision de balas: 6 nodos de 16x16 y el ojo central"""
-    eye_rect = pygame.Rect(round(base_pos.x + 39), round(base_pos.y + 30), 20, 20)
-    if pl_rect.colliderect(eye_rect):
+    """Misma geometria que usa la colision de balas: 6 nodos y el ojo central"""
+    if pl_rect.colliderect(combat.get_eye_rect(base_pos)):
         return True
-    for index, center in enumerate(combat.node_centers):
+    for index in range(len(combat.node_centers)):
         if combat.node_destroyed[index]:
             continue
-        node_rect = pygame.Rect(round(base_pos.x + center.x - 8),
-                                round(base_pos.y + center.y - 8), 16, 16)
-        if pl_rect.colliderect(node_rect):
+        if pl_rect.colliderect(combat.get_node_rect(base_pos, index)):
             return True
     return False
 

@@ -3,36 +3,8 @@
         "special_shot": false,
         "condition": {"yellow": 8, "red": 90},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                },
-                "base_score": 1500,
-                "node_score": 200
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                },
-                "base_score": 1500,
-                "node_score": 200
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 896, "y": 513}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1465, "y": 293}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -191,36 +163,9 @@
         "special_shot": true,
         "condition": {"yellow": 7, "red": 85},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 1026, "y": 1752}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 602, "y": 1418}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1240, "y": 464}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -319,36 +264,10 @@
         "special_shot": true,
         "condition": {"yellow": 7, "red": 80},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 1135, "y": 1837}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1077, "y": 447}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 354, "y": 1224}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1004, "y": 1336}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -447,36 +366,11 @@
         "special_shot": true,
         "condition": {"yellow": 6, "red": 75},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 723, "y": 1713}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 228, "y": 170}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 117, "y": 973}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 671, "y": 171}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 368, "y": 759}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -575,36 +469,12 @@
         "special_shot": true,
         "condition": {"yellow": 6, "red": 70},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 574, "y": 739}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 660, "y": 1340}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 152, "y": 665}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 655, "y": 176}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1404, "y": 390}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1291, "y": 1418}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -703,36 +573,13 @@
         "special_shot": true,
         "condition": {"yellow": 5, "red": 65},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 309, "y": 1472}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 549, "y": 488}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1454, "y": 366}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 314, "y": 1034}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 909, "y": 1367}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1037, "y": 811}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 505, "y": 1802}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -831,36 +678,14 @@
         "special_shot": true,
         "condition": {"yellow": 5, "red": 60},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 1261, "y": 1339}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 131, "y": 486}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 314, "y": 1643}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1033, "y": 1639}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 64, "y": 1863}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1092, "y": 200}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 832, "y": 592}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 977, "y": 1035}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -959,36 +784,14 @@
         "special_shot": true,
         "condition": {"yellow": 4, "red": 55},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 82, "y": 1376}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1341, "y": 613}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 712, "y": 1289}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 578, "y": 501}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 377, "y": 1109}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1080, "y": 1429}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 237, "y": 595}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1472, "y": 961}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -1087,36 +890,14 @@
         "special_shot": true,
         "condition": {"yellow": 4, "red": 50},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 332, "y": 1504}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1186, "y": 598}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1318, "y": 1508}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 865, "y": 721}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 464, "y": 84}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 781, "y": 1831}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 807, "y": 292}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 169, "y": 374}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {
@@ -1215,36 +996,14 @@
         "special_shot": true,
         "condition": {"yellow": 3, "red": 45},
         "enemy_bases": [
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 653,
-                    "y": 960
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            },
-            {
-                "image": "assets/img/naves.png",
-                "position": {
-                    "x": 500,
-                    "y": 500
-                },
-                "base_score": 1500,
-                "node_score": 200,
-                "sprite_area": {
-                    "x": 120,
-                    "y": 55,
-                    "w": 79,
-                    "h": 66
-                }
-            }
+            {"image": "assets/img/naves.png", "position": {"x": 875, "y": 1719}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1064, "y": 974}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 392, "y": 1337}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 915, "y": 433}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1128, "y": 92}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 217, "y": 1777}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 824, "y": 1224}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
+            {"image": "assets/img/naves.png", "position": {"x": 1411, "y": 1144}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200}
         ],
         "enemies": [
             {

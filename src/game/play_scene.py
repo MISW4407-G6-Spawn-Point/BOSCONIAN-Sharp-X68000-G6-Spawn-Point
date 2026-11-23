@@ -7,7 +7,7 @@ from src.create.prefab_creator import (create_camera, create_enemy_spawner, crea
                                        create_pause_text, create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield,
-                                       create_timed_spawner, random_base_positions,
+                                       create_timed_spawner,
                                        create_special_hud, create_special_shot_message,
                                        player_shot_angles)
 from src.ecs.components.c_base_turrets import CBaseTurrets
@@ -21,6 +21,7 @@ from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_pause import CTagPause
+from src.ecs.systems.s_base_core import system_base_core
 from src.ecs.systems.s_base_turrets import system_base_turrets
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_bullet_screen import system_bullet_screen
@@ -113,7 +114,6 @@ class PlayScene(Scene):
         self._difficulty_cfg = ServiceLocator.configs_service.get("assets/cfg/difficulty.json")
         level_with_obstacles = dict(self._level_cfg)
         level_with_obstacles.setdefault("obstacles", self._scaled_obstacles(obstacles_cfg))
-        level_with_obstacles["enemy_bases"] = self._random_bases()
         level_entities = create_level_objects(self.ecs_world, level_with_obstacles, obstacles_cfg,self._world_size, self._player_start)
         self._p_ship = self.ecs_world.component_for_entity(self._player_entity, CPlayerShip)
         self._p_state = self.ecs_world.component_for_entity(self._player_entity, CPlayerState)
@@ -177,17 +177,6 @@ class PlayScene(Scene):
         spawn_cfg["accuracy"] = self._scaled(rules["accuracy"])
         return spawn_cfg
 
-    def _random_bases(self) -> list:
-        """Cada ronda hay mas bases, en posiciones al azar. Se usa la primera base del
-        nivel como plantilla (imagen y puntajes)."""
-        template = self._level_cfg["enemy_bases"]
-        template = template[0] if isinstance(template, list) else template
-        rules = self._difficulty_cfg["bases"]
-        positions = random_base_positions(round(self._scaled(rules["count"])), self._world_size,
-                                          self._player_start, rules["safe_radius"],
-                                          rules["min_distance"])
-        return [dict(template, position=position) for position in positions]
-
     def _scaled_obstacles(self, obstacles_cfg:dict) -> dict:
         """Cada ronda hay mas rocas y minas (default_counts * multiplicador)."""
         mult = self._scaled(self._difficulty_cfg["obstacles_multiplier"])
@@ -211,6 +200,8 @@ class PlayScene(Scene):
             return  # en pausa solo titilan las estrellas
         system_condition(self.ecs_world, delta_time)
         system_enemy_base_eye(self.ecs_world, delta_time)
+        system_base_core(self.ecs_world, self._player_entity, self._world_size,
+                         self._enemies_cfg, self._player_cfg["max_speed"])
         system_sprite_animation(self.ecs_world, delta_time)
         system_player_ship(self.ecs_world, delta_time)
         system_enemy_spawner(self.ecs_world, self._player_entity, self._enemies_cfg,
