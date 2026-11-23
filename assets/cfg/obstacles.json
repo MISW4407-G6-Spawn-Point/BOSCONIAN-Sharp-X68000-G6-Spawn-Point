@@ -9,11 +9,19 @@
         "2-a":  {"score": 10},
         "2-b":  {"score": 10},
         "2-c":  {"score": 10},
-        "mine": {"score": 20, "sprite_area": {"x": 0, "y": 87, "w": 16, "h": 15}}
+        "mine": {"score": 20, "sprite_area": {"x": 0, "y": 87, "w": 16, "h": 15}},
+        "indestructible": {
+            "score": 0,
+            "sprite_area": {"x": 167, "y": 31, "w": 14, "h": 14},
+            "tint": {"r": 120, "g": 200, "b": 255},
+            "speed": 30,
+            "hitbox": {"w": 11, "h": 11}
+        }
     },
     "default_counts": {
         "1-a": 12, "1-b": 12, "1-c": 12,
         "2-a": 12, "2-b": 12, "2-c": 12,
-        "mine": 16
+        "mine": 16,
+        "indestructible": 1.5
     }
 }

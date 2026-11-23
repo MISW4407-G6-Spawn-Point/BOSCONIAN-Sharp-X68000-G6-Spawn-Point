@@ -48,6 +48,7 @@ from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.c_lifetime import CLifetime
 from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 from src.ecs.components.c_base_core import CBaseCore
+from src.ecs.components.tags.c_tag_indestructible import CTagIndestructible
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -292,7 +293,7 @@ def create_random_obstacles(world:esper.World, obstacles_cfg:dict, counts:dict,
     gap = obstacles_cfg["min_gap"]
     for obstacle_type, count in counts.items():
         type_cfg = obstacles_cfg["types"][obstacle_type]
-        area = type_cfg.get("sprite_area", _LEVEL_SPRITE_AREAS[obstacle_type])
+        area = type_cfg.get("sprite_area") or _LEVEL_SPRITE_AREAS[obstacle_type]
         for _ in range(count):
             for _attempt in range(50):
                 pos = pygame.Vector2(random.uniform(0, world_size["w"] - area["w"]),
@@ -307,13 +308,29 @@ def create_random_obstacles(world:esper.World, obstacles_cfg:dict, counts:dict,
                 object_cfg = {"image": obstacles_cfg["image"], "sprite_area": area,
                               "score": type_cfg["score"],
                               "position": {"x": pos.x, "y": pos.y}}
-                if obstacle_type == "mine":
+                if obstacle_type == "indestructible":
+                    created_entities.append(create_indestructible_rock(
+                        world, pos, obstacles_cfg["image"], type_cfg))
+                elif obstacle_type == "mine":
                     created_entities.append(_create_mine_object(world, object_cfg))
                 else:
                     created_entities.append(_create_level_object(
                         world, object_cfg, obstacle_type, type_cfg["score"]))
                 break
     return created_entities
+
+
+def create_indestructible_rock(world:esper.World, pos:pygame.Vector2, image_path:str,
+                               rock_cfg:dict) -> int:
+    """Roca teñida que avanza en linea recta en una direccion al azar"""
+    surface = _create_level_surface(image_path, rock_cfg["sprite_area"])
+    surface.fill(_color(rock_cfg["tint"]), special_flags=pygame.BLEND_RGB_MULT)
+    direction = pygame.Vector2(1, 0).rotate(random.uniform(0, 360))
+    rock_entity = create_sprite(world, pos, direction * rock_cfg["speed"], surface)
+    world.add_component(rock_entity, CTagWorld())
+    world.add_component(rock_entity, CTagIndestructible())
+    world.add_component(rock_entity, CHitBox(rock_cfg["hitbox"]))
+    return rock_entity
 
 
 def random_base_positions(count:int, world_size:dict, safe_center:dict, safe_radius:float,

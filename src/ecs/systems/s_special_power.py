@@ -10,6 +10,7 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_camera import world_to_screen
+from src.ecs.systems.s_mine_explosion import explode_mine
 
 
 def system_special_power(world: esper.World, player_entity: int, camera: CCamera,
@@ -27,9 +28,12 @@ def system_special_power(world: esper.World, player_entity: int, camera: CCamera
         screen_rect = pygame.Rect(world_to_screen(camera, c_t.pos), c_s.area.size)
         if not camera.view.colliderect(screen_rect):
             continue
+        _add_score(world, c_lo.score)
+        if c_lo.object_type == "mine":
+            explode_mine(world, entity, explosion_cfg)
+            continue
         create_explosion(world, c_t.pos + pygame.Vector2(c_s.area.size) / 2, explosion_cfg,
                          world.component_for_entity(entity, CVelocity).vel)
-        _add_score(world, c_lo.score)
         world.delete_entity(entity)
 
 

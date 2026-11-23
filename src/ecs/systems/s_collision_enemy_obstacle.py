@@ -9,6 +9,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_enemy_state import wrapped_overlap
 from src.ecs.systems.s_formation import forfeit_formation_bonus
+from src.ecs.systems.s_mine_explosion import explode_mine
 
 ENEMY_TYPES = {"i", "p", "e", "spy"}
 _OBSTACLE_TYPES = {"1-a", "1-b", "1-c", "2-a", "2-b", "2-c", "mine"}
@@ -44,8 +45,11 @@ def system_collision_enemy_obstacle(world:esper.World, world_size:dict, explosio
                 continue
             create_explosion(world, pygame.Vector2(enemy_rect.center), explosion_cfg,
                              world.component_for_entity(enemy, CVelocity).vel)
-            create_explosion(world, pygame.Vector2(obstacle_rect.center), explosion_cfg)
             forfeit_formation_bonus(world, enemy)
             world.delete_entity(enemy)
-            world.delete_entity(obstacle)
+            if world.component_for_entity(obstacle, CLevelObject).object_type == "mine":
+                explode_mine(world, obstacle, explosion_cfg)
+            else:
+                create_explosion(world, pygame.Vector2(obstacle_rect.center), explosion_cfg)
+                world.delete_entity(obstacle)
             break

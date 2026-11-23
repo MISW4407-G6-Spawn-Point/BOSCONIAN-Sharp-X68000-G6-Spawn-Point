@@ -11,6 +11,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.systems.s_condition import reset_condition
+from src.ecs.systems.s_mine_explosion import explode_mine
 from src.create.prefab_creator import create_score_popup
 
 
@@ -162,17 +163,20 @@ def system_collision_bullet_level_object(
                 continue
 
             object_rect = _entity_rect(object_transform, object_surface)
-            create_explosion(
-                world,
-                pygame.Vector2(object_rect.center),
-                explosion_cfg,
-                world.component_for_entity(object_entity, CVelocity).vel,
-            )
             _add_score(world, level_object.score)
             if level_object.object_type == "spy":
                 create_score_popup(world, pygame.Vector2(object_rect.center), level_object.score)
             impacted_objects.add(object_entity)
             impacted_bullets.add(bullet_entity)
             world.delete_entity(bullet_entity)
-            world.delete_entity(object_entity)
+            if level_object.object_type == "mine":
+                explode_mine(world, object_entity, explosion_cfg)
+            else:
+                create_explosion(
+                    world,
+                    pygame.Vector2(object_rect.center),
+                    explosion_cfg,
+                    world.component_for_entity(object_entity, CVelocity).vel,
+                )
+                world.delete_entity(object_entity)
             break

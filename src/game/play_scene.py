@@ -30,6 +30,8 @@ from src.ecs.systems.s_collision_bullet_level_object import system_collision_bul
 from src.ecs.systems.s_collision_enemy_bullet import system_collision_enemy_bullet
 from src.ecs.systems.s_collision_enemy_bounce import system_collision_enemy_bounce
 from src.ecs.systems.s_collision_enemy_obstacle import system_collision_enemy_obstacle
+from src.ecs.systems.s_collision_indestructible import system_collision_indestructible
+from src.ecs.systems.s_mine_explosion import system_mine_explosion
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
@@ -221,6 +223,9 @@ class PlayScene(Scene):
         system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
                             self._enemy_bullet_cfg, delta_time)
         system_movement(self.ecs_world, delta_time)
+        system_collision_indestructible(self.ecs_world, self._player_entity, self._world_size,
+                                        self._explosion_cfg, self._god_mode,
+                                        self._on_player_hit)
         system_collision_bullet_level_object(
             self.ecs_world,
             self._explosion_cfg,
@@ -232,6 +237,8 @@ class PlayScene(Scene):
                                       self._god_mode, self._on_player_hit)
         system_collision_enemy_obstacle(self.ecs_world, self._world_size, self._explosion_cfg)
         system_collision_enemy_bounce(self.ecs_world, self._world_size)
+        system_mine_explosion(self.ecs_world, self._player_entity, self._world_size,
+                              self._explosion_cfg, self._god_mode, self._on_player_hit)
         system_player_state(self.ecs_world, self._player_entity, delta_time,
                             self._on_player_respawn)
         system_explosion(self.ecs_world, delta_time)

@@ -12,6 +12,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 from src.ecs.systems.s_formation import forfeit_formation_bonus
+from src.ecs.systems.s_mine_explosion import explode_mine
 
 # Naves enemigas (sueltas, de formacion y espia): explotan con la bala, sin puntaje
 _ENEMY_TYPES = {"i", "p", "e", "spy"}
@@ -63,5 +64,8 @@ def system_collision_enemy_bullet(world:esper.World, player_entity:int, explosio
                                  world.component_for_entity(entity, CVelocity).vel)
                 forfeit_formation_bonus(world, entity)
                 world.delete_entity(entity)
+                hit_objects.add(entity)
+            elif c_lo.object_type == "mine":
+                explode_mine(world, entity, explosion_cfg)
                 hit_objects.add(entity)
             break
