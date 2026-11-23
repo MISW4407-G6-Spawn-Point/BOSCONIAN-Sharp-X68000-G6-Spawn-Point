@@ -51,10 +51,12 @@ class GameEngine:
     def _load_config_files(self):
         configs = ServiceLocator.configs_service
         self.window_cfg = configs.get("assets/cfg/window.json")
+        self.music_cfg = configs.get("assets/cfg/music.json")
 
     async def run(self, start_scene_name:str) -> None:
         self.is_running = True
         self._current_scene = self._scenes[start_scene_name]
+        self._play_scene_music(start_scene_name)
         self._create()
         while self.is_running:
             self._calculate_time()
@@ -68,6 +70,14 @@ class GameEngine:
     def switch_scene(self, new_scene_name:str):
         """Pide un cambio de escena; se aplica al final del frame actual."""
         self._scene_name_to_switch = new_scene_name
+        
+    def _play_scene_music(self, scene_name:str):
+            """Cada escena tiene su pista en music.json; si no tiene, se silencia."""
+            music = self.music_cfg["scenes"].get(scene_name)
+            if music is None:
+                ServiceLocator.sounds_service.stop_music()
+            else:
+                ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
 
     def _create(self):
         self._current_scene.do_create()
@@ -94,6 +104,7 @@ class GameEngine:
         if self._scene_name_to_switch is not None:
             self._current_scene.clean()
             self._current_scene = self._scenes[self._scene_name_to_switch]
+            self._play_scene_music(self._scene_name_to_switch)
             self._current_scene.do_create()
             self._scene_name_to_switch = None
 

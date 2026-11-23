@@ -134,6 +134,13 @@
             "max_icons": 4,
             "position": {"x": 244, "y": 208},
             "spacing": 3
-        }
+        },
+        "special": {
+            "text": "SPECIAL",
+            "size": 8,
+            "color": {"r": 255, "g": 255, "b": 255},
+            "label_position": {"x": 244, "y": 246},
+            "value_position": {"x": 316, "y": 246}
+}
     }
 }
