@@ -67,7 +67,6 @@ from src.ecs.systems.s_special_power import activate_boost, system_special_power
 from src.ecs.systems.s_boost_item import system_boost_item
 from src.ecs.systems.s_special_hud import system_special_hud
 
-# Comando -> eje que suma a la entrada de la nave
 _DIRECTION_INPUTS = {
     "PLAYER_LEFT": pygame.Vector2(-1, 0),
     "PLAYER_RIGHT": pygame.Vector2(1, 0),
@@ -76,7 +75,6 @@ _DIRECTION_INPUTS = {
 }
 
 
-# Comando -> config de paginas que se muestra dentro de la pausa
 _PAUSE_PAGES = {
     "SHOW_INSTRUCTIONS": "instructions_scene",
     "SHOW_CREDITS": "credits_scene",
@@ -86,7 +84,6 @@ _PAUSE_PAGES = {
 class PlayScene(Scene):
     def __init__(self, game_engine):
         super().__init__(game_engine)
-        # nivel, puntaje, vidas y record viven en la sesion (sobreviven entre escenas)
         self._session = game_engine.session
         self._god_mode = False
 
@@ -127,7 +124,6 @@ class PlayScene(Scene):
                                     CSpecialPower(self._special_cfg["start_charges"],
                                                   self._special_cfg["max_charges"],
                                                   self._player_cfg["max_speed"]))
-        # habilidad especial del nivel: disparo de 4 balas (3 al frente y 1 atras)
         special_shot = self._level_cfg.get("special_shot", False)
         self.ecs_world.add_component(self._player_entity, CPlayerWeapon(special_shot))
         obstacles_cfg = ServiceLocator.configs_service.get("assets/cfg/obstacles.json")
@@ -160,7 +156,6 @@ class PlayScene(Scene):
         for entity in level_entities:
             level_object = self.ecs_world.try_component(entity, CLevelObject)
             if level_object is not None and level_object.object_type == "enemy_base":
-                # una torreta por nodo de la base
                 combat = self.ecs_world.component_for_entity(entity, CEnemyBaseCombat)
                 self.ecs_world.add_component(entity, CBaseTurrets(
                     len(combat.node_centers), self._enemy_bullet_cfg["interval_min"],
@@ -171,15 +166,12 @@ class PlayScene(Scene):
                     self._radar_cfg["dot_size"],
                     self._radar_cfg["base_color"],
                 )
-        # cada nivel puede traer su "enemy_spawn"; si no, se usa el de enemies.json
         create_enemy_spawner(self.ecs_world, self._level_cfg.get(
             "enemy_spawn", self._scaled_enemy_spawn()))
-        # Ataques en formacion y espia (cada vez mas frecuentes segun la ronda)
         create_timed_spawner(self.ecs_world, "formation",
                              self._scaled(self._difficulty_cfg["formation_interval"]))
         create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
                              self._scaled(self._difficulty_cfg["spy_chance"]))
-        # BLAST OFF!: el mensaje del arma especial sale al terminar (_on_cutscene_end)
         self._special_shot = special_shot
         create_blast_off(self.ecs_world, interface_cfg["blast_off"], self._font,
                          DIRECTIONS[self._p_ship.dir_index])
@@ -239,10 +231,9 @@ class PlayScene(Scene):
         system_blink(self.ecs_world, delta_time)
         if self._paused:
             self._update_pause_page(delta_time)
-            return  # en pausa solo titilan las estrellas
+            return
         star_offset = system_cutscene(self.ecs_world, delta_time, self._on_cutscene_end)
         if star_offset is not None:
-            # BLAST OFF!: solo se mueven las estrellas, el juego no avanza
             system_star_parallax(self.ecs_world, star_offset)
             system_star_wrap(self.ecs_world, self._play_area)
             system_score_display(self.ecs_world)
@@ -339,7 +330,7 @@ class PlayScene(Scene):
             respawn_player(self.ecs_world, self._player_entity, self._player_start)
         else:
             self._session.lives_lost += 1
-            self._p_state.timer = float("inf")  # evita pedir el cambio mas de una vez
+            self._p_state.timer = float("inf")
             self.switch_scene(self._scenes_cfg["game_over_scene"])
 
     def do_draw(self, screen:pygame.Surface):
@@ -375,7 +366,7 @@ class PlayScene(Scene):
 
     def _toggle_pause(self):
         if self._paused and self._pause_view != "menu":
-            self._show_pause_view("menu")  # P en una pagina vuelve al menu
+            self._show_pause_view("menu")
             return
         self._paused = not self._paused
         if self._paused:
@@ -417,7 +408,6 @@ class PlayScene(Scene):
 
         if action.name == "PLAYER_FIRE" and self._can_act():
             num_bullets = len(self.ecs_world.get_component(CTagBullet))
-            # 2 balas normal, 4 con el disparo especial del nivel
             angles = player_shot_angles(self.ecs_world, self._player_entity, self._bullet_cfg)
             if num_bullets + len(angles) <= self._bullet_cfg["max_bullets"]:
                 create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg,
@@ -425,7 +415,6 @@ class PlayScene(Scene):
 
         elif action.name == "PLAYER_SPECIAL" and self._can_act():
             activate_boost(self.ecs_world, self._player_entity, self._special_cfg)
-        # --- Modo trampa (ver README) ---
         elif action.name == "CHEAT_NEXT_LEVEL":
             self._next_level()
         elif action.name == "CHEAT_GOD_MODE":

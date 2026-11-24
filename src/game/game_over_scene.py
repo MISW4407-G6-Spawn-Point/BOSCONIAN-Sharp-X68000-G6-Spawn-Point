@@ -33,7 +33,6 @@ class GameOverScene(Scene):
                    session.score, session.level, session.hi_score, 0)
         create_texts(self.ecs_world, interface_cfg["game_over_scene"]["texts"], font)
 
-        # El numero de la cuenta regresiva reutiliza CScoreDisplay
         cd = interface_cfg["game_over_scene"]["countdown"]
         countdown_entity = create_text(self.ecs_world, str(self._time), font, cd["size"],
                                        cd["color"], cd["position"])
@@ -49,12 +48,11 @@ class GameOverScene(Scene):
         system_movement(self.ecs_world, delta_time)
         system_star_wrap(self.ecs_world, self._play_area)
         if self._time <= 0:
-            return  # ya se pidio el cambio de escena
+            return
         self._time -= delta_time
         self._countdown.value = max(0, math.ceil(self._time))
         system_score_display(self.ecs_world)
         if self._time <= 0:
-            # game over definitivo: guarda el record y felicita si se supero
             session = self._game_engine.session
             session.save_record()
             self.switch_scene(self._scene_cfg["record_scene"] if session.is_new_record()
@@ -62,6 +60,5 @@ class GameOverScene(Scene):
 
     def do_action(self, action:CInputCommand):
         if action.name == "CONTINUE" and action.phase == CommandPhase.STARTED:
-            # Continuar: mismo nivel, todas las vidas, puntaje en cero
             self._game_engine.session.continue_game()
             self.switch_scene(self._scene_cfg["continue_scene"])

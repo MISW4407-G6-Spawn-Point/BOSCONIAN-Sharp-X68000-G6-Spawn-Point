@@ -27,11 +27,11 @@ def system_base_turrets(world:esper.World, player_entity:int, world_size:dict,
                                                         CTransform):
         for index in range(len(combat.node_centers)):
             if combat.node_destroyed[index]:
-                continue  # torreta destruida: no dispara
+                continue
             turret_center = combat.get_node_center(c_t.pos, index)
             to_player = shortest_delta(turret_center, player_center, world_size)
             if to_player.length() > enemy_bullet_cfg["range"] or to_player.length_squared() == 0:
-                continue  # fuera de alcance: el temporizador no corre
+                continue
             c_bt.timers[index] -= delta_time
             if c_bt.timers[index] <= 0:
                 create_enemy_bullet(world, turret_center, to_player.normalize(),

@@ -14,9 +14,7 @@ from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 from src.ecs.systems.s_formation import forfeit_formation_bonus
 from src.ecs.systems.s_mine_explosion import explode_mine
 
-# Naves enemigas (sueltas, de formacion y espia): explotan con la bala, sin puntaje
 _ENEMY_TYPES = {"i", "p", "e", "spy"}
-# Rocas y minas: solo detienen la bala
 _OBSTACLE_TYPES = {"1-a", "1-b", "1-c", "2-a", "2-b", "2-c", "mine"}
 
 
@@ -42,7 +40,6 @@ def system_collision_enemy_bullet(world:esper.World, player_entity:int, explosio
                                                              CSurface):
         bullet_rect = CSurface.get_area_relative(b_s.area, b_t.pos)
 
-        # Jugador: muere salvo en modo invencible (ahi la bala lo atraviesa)
         if not god_mode and pl_state.state == PlayerState.ALIVE \
                 and bullet_rect.colliderect(pl_rect):
             world.delete_entity(bullet_entity)
@@ -54,7 +51,7 @@ def system_collision_enemy_bullet(world:esper.World, player_entity:int, explosio
                 continue
             is_enemy = c_lo.object_type in _ENEMY_TYPES
             if not is_enemy and c_lo.object_type not in _OBSTACLE_TYPES:
-                continue  # la base que dispara no se dana con sus balas
+                continue
             obj_rect = _object_rect(world, entity, c_t, c_s)
             if not bullet_rect.colliderect(obj_rect):
                 continue

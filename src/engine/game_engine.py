@@ -7,6 +7,7 @@ import pygame
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
 from src.game.boot_scene import BootScene
+from src.game.intro_scene import IntroScene
 from src.game.title_scene import TitleScene
 from src.game.level_scene import LevelScene
 from src.game.play_scene import PlayScene
@@ -35,12 +36,11 @@ class GameEngine:
                                     self.window_cfg["bg_color"]["g"],
                                     self.window_cfg["bg_color"]["b"])
 
-        # Datos de la partida (nivel, puntaje, vidas, record)
         self.session = GameSession(ServiceLocator.configs_service.get("assets/cfg/game.json"))
 
-        # Patron Escena: todas las escenas registradas por nombre
         self._scenes:dict[str, Scene] = {}
         self._scenes["BOOT_SCENE"] = BootScene(self)
+        self._scenes["INTRO_SCENE"] = IntroScene(self)
         self._scenes["TITLE_SCENE"] = TitleScene(self)
         self._scenes["LEVEL_SCENE"] = LevelScene(self)
         self._scenes["PLAY_SCENE"] = PlayScene(self)

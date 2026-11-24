@@ -21,7 +21,6 @@ class VictoryScene(Scene):
         session = self._game_engine.session
         victory_cfg = interface_cfg["victory_scene"]
         scene_cfg = scenes_cfg["VICTORY_SCENE"]
-        # con record nuevo pasa por la escena de felicitacion
         self._next_scene = scene_cfg["record_scene"] if session.is_new_record() \
             else scene_cfg["next_scene"]
         session.save_record()
@@ -32,7 +31,6 @@ class VictoryScene(Scene):
                    session.score, session.level, session.hi_score, session.lives)
         create_texts(self.ecs_world, victory_cfg["texts"], font)
 
-        # Muestra cuantas vidas y continuaciones se usaron
         stats = victory_cfg["stats"]
         values = {"score": session.score, "lives_lost": session.lives_lost,
                   "continues": session.continues}

@@ -1,6 +1,10 @@
 {
     "BOOT_SCENE": {
         "duration": 3.0,
+        "next_scene": "INTRO_SCENE"
+    },
+    "INTRO_SCENE": {
+        "duration": 9.0,
         "next_scene": "TITLE_SCENE"
     },
     "TITLE_SCENE": {

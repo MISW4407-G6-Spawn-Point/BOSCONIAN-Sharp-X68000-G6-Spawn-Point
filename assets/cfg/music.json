@@ -1,5 +1,6 @@
 {
     "scenes": {
+        "INTRO_SCENE":       {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},
         "TITLE_SCENE":       {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},
         "SCORE_TABLE_SCENE": {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},
         "INSTRUCTIONS_SCENE": {"track": "assets/mus/delayed_chips.ogg", "volume": 0.5},

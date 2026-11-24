@@ -20,6 +20,21 @@
             "text_color": {"r": 60, "g": 60, "b": 60}
         }
     },
+    "intro_scene": {
+        "steps": [
+            {"start_time": 0.0, "type": "starfield"},
+            {"start_time": 0.5, "type": "sprite", "id": "ship", "image": "assets/img/naves.png", "area": {"x": 124, "y": 7, "w": 15, "h": 18}, "position": {"x": 120, "y": 280}, "velocity": {"x": 0, "y": -120}, "stop_y": 150},
+            {"start_time": 1.5, "type": "sprite", "image": "assets/img/naves.png", "area": {"x": 0, "y": 111, "w": 14, "h": 14}, "position": {"x": 60, "y": 280}, "velocity": {"x": 15, "y": -150}},
+            {"start_time": 1.6, "type": "sprite", "image": "assets/img/naves.png", "area": {"x": 20, "y": 113, "w": 13, "h": 12}, "position": {"x": 180, "y": 280}, "velocity": {"x": -15, "y": -150}},
+            {"start_time": 1.8, "type": "sprite", "image": "assets/img/naves.png", "area": {"x": 41, "y": 109, "w": 7, "h": 16}, "position": {"x": 95, "y": 280}, "velocity": {"x": 8, "y": -170}},
+            {"start_time": 1.9, "type": "sprite", "image": "assets/img/naves.png", "area": {"x": 0, "y": 111, "w": 14, "h": 14}, "position": {"x": 145, "y": 280}, "velocity": {"x": -8, "y": -170}},
+            {"start_time": 3.0, "type": "move", "target": "ship", "velocity": {"x": 0, "y": -320}},
+            {"start_time": 3.0, "type": "explosion", "position": {"x": 120, "y": 220}},
+            {"start_time": 3.2, "type": "explosion", "position": {"x": 96, "y": 232}},
+            {"start_time": 4.0, "type": "sprite", "image": "assets/img/titulo.png", "position": {"x": 120, "y": -40}, "velocity": {"x": 0, "y": 110}, "stop_y": 119.5},
+            {"start_time": 5.0, "type": "text", "text": "PRESS ANY KEY", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 200}, "blink_time": 0.4}
+        ]
+    },
     "title_scene": {
         "logo": {
             "image": "assets/img/titulo.png",

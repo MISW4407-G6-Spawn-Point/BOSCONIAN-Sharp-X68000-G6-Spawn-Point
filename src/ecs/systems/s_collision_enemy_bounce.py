@@ -57,7 +57,7 @@ def system_collision_enemy_bounce(world:esper.World, world_size:dict):
         for b in enemies[i + 1:]:
             mover_a, mover_b = _mover(world, a), _mover(world, b)
             if mover_a == mover_b:
-                continue  # misma formacion: mantiene la figura
+                continue
             push = wrapped_overlap(hit_rect(world, a), hit_rect(world, b), world_size)
             if push is None:
                 continue

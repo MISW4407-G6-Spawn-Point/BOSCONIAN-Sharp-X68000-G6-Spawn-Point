@@ -15,7 +15,6 @@ def system_cutscene(world:esper.World, delta_time:float,
             world.delete_entity(entity)
             on_end()
             return None
-        # al final se desacelera hasta detenerse
         factor = min(1.0, c_c.time_left / c_c.slowdown_time) if c_c.slowdown_time > 0 else 1.0
         return c_c.direction * c_c.star_speed * factor * delta_time
     return None

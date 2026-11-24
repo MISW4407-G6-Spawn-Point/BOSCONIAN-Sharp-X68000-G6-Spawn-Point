@@ -19,7 +19,7 @@ def activate_boost(world: esper.World, player_entity: int, special_cfg: dict) ->
     c_sp.time_left = special_cfg["duration"]
     c_p = world.component_for_entity(player_entity, CPlayerShip)
     c_p.max_speed = c_sp.normal_speed * special_cfg["speed_multiplier"]
-    c_p.speed = c_p.max_speed  # acelera de inmediato
+    c_p.speed = c_p.max_speed
     ServiceLocator.sounds_service.play_cfg(special_cfg.get("sound"))
     return True
 
@@ -27,7 +27,7 @@ def activate_boost(world: esper.World, player_entity: int, special_cfg: dict) ->
 def _end_boost(c_sp: CSpecialPower, c_p: CPlayerShip, cooldown: float):
     c_sp.time_left = 0.0
     c_sp.cooldown_left = cooldown
-    c_p.max_speed = c_sp.normal_speed  # system_player_ship frena suave
+    c_p.max_speed = c_sp.normal_speed
 
 
 def system_special_power(world: esper.World, player_entity: int, special_cfg: dict,

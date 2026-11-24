@@ -22,7 +22,6 @@ class TitleScene(Scene):
         self._instructions_scene = scenes_cfg["TITLE_SCENE"]["instructions_scene"]
         self._credits_scene = scenes_cfg["TITLE_SCENE"]["credits_scene"]
         self._play_area = interface_cfg["play_area"]
-        # Volver al titulo siempre empieza una partida nueva
         session = self._game_engine.session
         session.new_game()
 

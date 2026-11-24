@@ -29,6 +29,8 @@ from src.ecs.components.c_sprite_animation import CSpriteAnimation
 from src.ecs.components.tags.c_tag_hide_on_pause import CTagHideOnPause
 from src.ecs.components.c_cutscene import CCutscene
 from src.ecs.components.c_boost_item_spawner import CBoostItemSpawner
+from src.ecs.components.c_intro_timeline import CIntroTimeline
+from src.ecs.components.c_stop_at import CStopAt
 from src.ecs.components.tags.c_tag_boost_item import CTagBoostItem
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.create.enemy_base_composer import enemy_base_composer
@@ -679,8 +681,8 @@ def _bullet_surface(sheet:pygame.Surface, areas:dict, dir_index:int) -> pygame.S
     if dir_index in (2, 6):
         return cut("horizontal")
     if dir_index in (1, 5):
-        return cut("diagonal")          # "/"
-    return pygame.transform.flip(cut("diagonal"), True, False)  # diagonal invertida
+        return cut("diagonal")
+    return pygame.transform.flip(cut("diagonal"), True, False)
 
 
 def player_shot_angles(world:esper.World, player_entity:int, bullet_cfg:dict) -> list:
@@ -706,7 +708,6 @@ def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict,
 
     for angle in angles:
         direction = pygame.Vector2(0, -1).rotate(angle)
-        # sprite de la direccion (de las 8) mas cercana al angulo
         dir_index = round(angle / 45) % 8
         surface = _bullet_surface(sheet, bullet_cfg["areas"], dir_index)
         pos = center - pygame.Vector2(surface.get_size()) / 2
@@ -730,7 +731,6 @@ def create_enemy_bullet(world:esper.World, center:pygame.Vector2, direction:pyga
     world.add_component(bullet_entity, CTagEnemyBullet())
     world.add_component(bullet_entity, CTagWorld())
     world.add_component(bullet_entity, CLifetime(enemy_bullet_cfg["lifetime"]))
-    # el sonido es opcional: si es null o el archivo no existe, no suena
     sound = enemy_bullet_cfg.get("sound")
     if sound and os.path.exists(sound):
         ServiceLocator.sounds_service.play(sound)
@@ -842,6 +842,68 @@ def create_boost_item_spawner(world:esper.World, interval:float, chance:float) -
     spawner = world.create_entity()
     world.add_component(spawner, CBoostItemSpawner(interval, chance))
     return spawner
+
+
+def create_intro_timeline(world:esper.World, steps:list) -> int:
+    timeline = world.create_entity()
+    world.add_component(timeline, CIntroTimeline(steps))
+    return timeline
+
+
+def _intro_sprite(world:esper.World, step:dict) -> int:
+    """Imagen (o recorte de una hoja) con centro en position, velocidad y freno opcional"""
+    image = ServiceLocator.images_service.get(step["image"])
+    if "area" in step:
+        area = step["area"]
+        image = image.subsurface(pygame.Rect(area["x"], area["y"], area["w"], area["h"]))
+    image = pygame.transform.rotate(image, step.get("rotation", 0))
+    size = pygame.Vector2(image.get_size())
+    pos = pygame.Vector2(step["position"]["x"], step["position"]["y"]) - size / 2
+    vel = step.get("velocity", {"x": 0, "y": 0})
+    entity = create_sprite(world, pos, pygame.Vector2(vel["x"], vel["y"]), image)
+    if "stop_y" in step:
+        world.add_component(entity, CStopAt(step["stop_y"] - size.y / 2))
+    return entity
+
+
+def _intro_move(world:esper.World, step:dict, named:dict) -> None:
+    """Cambia la velocidad de una entidad creada antes (por su id)"""
+    entity = named.get(step["target"])
+    if entity is None or not world.entity_exists(entity):
+        return
+    world.component_for_entity(entity, CVelocity).vel = pygame.Vector2(
+        step["velocity"]["x"], step["velocity"]["y"])
+    if world.has_component(entity, CStopAt):
+        world.remove_component(entity, CStopAt)
+
+
+def create_intro_step(world:esper.World, step:dict, named:dict) -> None:
+    """Crea lo que pide un paso del intro segun su "type" """
+    configs = ServiceLocator.configs_service
+    kind = step["type"]
+    entity = None
+    if kind == "starfield":
+        interface_cfg = configs.get("assets/cfg/interface.json")
+        create_starfield(world, configs.get("assets/cfg/world.json"),
+                         interface_cfg["play_area"], in_menu=True)
+    elif kind == "sprite":
+        entity = _intro_sprite(world, step)
+    elif kind == "move":
+        _intro_move(world, step, named)
+    elif kind == "explosion":
+        entity = create_explosion(world, pygame.Vector2(step["position"]["x"],
+                                                        step["position"]["y"]),
+                                  configs.get("assets/cfg/explosion.json"))
+        world.remove_component(entity, CTagWorld)
+    elif kind == "text":
+        font = configs.get("assets/cfg/interface.json")["font"]
+        entity = create_text(world, step["text"], font, step["size"], step["color"],
+                             step["position"])
+        if step.get("blink_time", 0) > 0:
+            c_s = world.component_for_entity(entity, CSurface)
+            world.add_component(entity, CBlink(c_s.surf, step["blink_time"]))
+    if entity is not None and "id" in step:
+        named[step["id"]] = entity
 
 
 def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:
@@ -956,7 +1018,6 @@ def create_formation(world:esper.World, player_entity:int, formations_cfg:dict,
                                                  leader_sprites))
     create_radar_dot(world, leader, radar_cfg["dot_size"], formations_cfg["radar_color"])
 
-    # Las otras 4 naves
     member_cfg = enemies_cfg["types"][member_type]
     member_sprites = _rotated_sprites(image, member_cfg["area"])
     members = [leader]
