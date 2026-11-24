@@ -116,6 +116,7 @@ class PlayScene(Scene):
         self._interface_cfg = interface_cfg
         self._paused = False
         self._pause_view = None
+        self._held_directions = set()
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
         self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
@@ -405,11 +406,12 @@ class PlayScene(Scene):
             return
 
         if action.name in _DIRECTION_INPUTS:
-            axis = _DIRECTION_INPUTS[action.name]
             if action.phase == CommandPhase.STARTED:
-                self._p_ship.input += axis
+                self._held_directions.add(action.name)
             elif action.phase == CommandPhase.END:
-                self._p_ship.input -= axis
+                self._held_directions.discard(action.name)
+            self._p_ship.input = sum((_DIRECTION_INPUTS[name] for name in self._held_directions),
+                                     pygame.Vector2(0, 0))
             return
 
         if self._paused or action.phase != CommandPhase.STARTED:
