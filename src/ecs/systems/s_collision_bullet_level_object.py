@@ -2,6 +2,7 @@ import esper
 import pygame
 
 from src.create.prefab_creator import create_explosion
+from src.ecs.components.c_boss import CBoss
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
 from src.ecs.components.c_enemy_base_eye import CEnemyBaseEye
 from src.ecs.components.c_level_object import CLevelObject
@@ -46,7 +47,7 @@ def _add_score(world: esper.World, points: int) -> None:
             score_display.value += points
 
 
-def _explode_base(
+def explode_base(
     world: esper.World,
     base_origin: pygame.Vector2,
     base_combat: CEnemyBaseCombat,
@@ -115,11 +116,15 @@ def system_collision_bullet_level_object(
             if hit_index is None:
                 continue
 
+            boss = world.try_component(base_entity, CBoss)
             if hit_index == -1 and not base_combat.is_on_axis(
                     world.component_for_entity(bullet_entity, CVelocity).vel):
                 world.delete_entity(bullet_entity)
+            elif hit_index == -1 and boss is not None:
+                boss.core_hp -= 1
+                world.delete_entity(bullet_entity)
             elif hit_index == -1:
-                _explode_base(world, base_origin, base_combat, explosion_cfg)
+                explode_base(world, base_origin, base_combat, explosion_cfg)
                 _add_score(world, base_object.score)
                 create_score_popup(world, base_combat.get_core_center(base_origin),
                                    base_object.score)
@@ -136,8 +141,8 @@ def system_collision_bullet_level_object(
                     base_combat.node_destroyed[hit_index] = True
                     _add_score(world, base_object.node_score)
                 world.delete_entity(bullet_entity)
-                if base_combat.has_been_destroyed():
-                    _explode_base(world, base_origin, base_combat, explosion_cfg)
+                if base_combat.has_been_destroyed() and boss is None:
+                    explode_base(world, base_origin, base_combat, explosion_cfg)
                     _add_score(world, base_object.score)
                     create_score_popup(world, base_combat.get_core_center(base_origin),
                                        base_object.score)

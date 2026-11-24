@@ -18,8 +18,12 @@ class LevelScene(Scene):
         self._play_area = interface_cfg["play_area"]
 
         create_starfield(self.ecs_world, world_cfg, interface_cfg["play_area"], in_menu=True)
-        texts = [dict(info, text=info["text"].format(level=session.level))
-                 for info in interface_cfg["level_scene"]["texts"]]
+        level_cfg = interface_cfg["level_scene"]
+        texts_cfg = level_cfg["boss_texts"] if session.is_boss_round() else level_cfg["texts"]
+        texts = [dict(info, text=info["text"].format(level=session.level)) for info in texts_cfg]
+        music = ServiceLocator.configs_service.get("assets/cfg/music.json").get("boss")
+        if session.is_boss_round() and music:
+            ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
         create_texts(self.ecs_world, texts, font)
         create_hud(self.ecs_world, interface_cfg["hud"], font, None, session.score,
                    session.level, session.hi_score, session.lives)

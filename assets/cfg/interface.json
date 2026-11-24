@@ -61,6 +61,10 @@
         "texts": [
             {"text": "LEVEL {level}", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 104}},
             {"text": "AROUND THE PLANET RED.", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 124}}
+        ],
+        "boss_texts": [
+            {"text": "BOSS ROUND", "size": 8, "color": {"r": 255, "g": 80, "b": 255}, "position": {"x": 120, "y": 104}},
+            {"text": "MOTHER BASE APPROACHING!", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 124}}
         ]
     },
     "instructions_scene": {
@@ -136,7 +140,12 @@
                 {"text": "YELLOW  ENEMIES ATTACK,", "icon": {"box": {"r": 230, "g": 230, "b": 0}, "w": 12, "h": 8}},
                 {"text": "        FORMATIONS + SPY", "indent": true},
                 {"text": "RED     FASTER, MORE", "icon": {"box": {"r": 230, "g": 0, "b": 0}, "w": 12, "h": 8}},
-                {"text": "        ENEMIES!", "indent": true}
+                {"text": "        ENEMIES!", "indent": true},
+                "",
+                {"text": "BOSS", "color": {"r": 255, "g": 210, "b": 120}},
+                "AFTER ROUND 10: MOTHER BASE.",
+                "BREAK ITS CANNONS, THEN HIT",
+                "ITS OPEN CORE MANY TIMES."
             ]
         ]
     },

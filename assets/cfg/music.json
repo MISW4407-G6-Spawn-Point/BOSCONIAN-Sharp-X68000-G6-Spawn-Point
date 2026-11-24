@@ -16,5 +16,6 @@
         {"track": "assets/mus/xenostar2loop_.ogg", "volume": 0.4},
         {"track": "assets/mus/zero2.ogg", "volume": 0.4}
     ],
+    "boss": {"track": "assets/mus/confrontation.ogg", "volume": 0.5},
     "red_alert": {"track": "assets/mus/intense_momentloop.ogg", "volume": 0.45}
 }

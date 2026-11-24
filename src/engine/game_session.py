@@ -21,6 +21,11 @@ class GameSession:
         self.lives_lost = 0
         self.next_extra_life = self._cfg["extra_life"]["first"]
 
+    def is_boss_round(self) -> bool:
+        """La ronda del jefe es la que indica level.json -> "boss" -> "round" """
+        boss = ServiceLocator.configs_service.get("assets/cfg/level.json").get("boss")
+        return boss is not None and self.level == boss["round"]
+
     def continue_game(self):
         """Continuar: recupera todas las vidas y pierde todo el puntaje (mismo lvl)"""
         self.save_record()

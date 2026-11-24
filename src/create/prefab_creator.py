@@ -32,6 +32,8 @@ from src.ecs.components.c_boost_item_spawner import CBoostItemSpawner
 from src.ecs.components.c_intro_timeline import CIntroTimeline
 from src.ecs.components.c_stop_at import CStopAt
 from src.ecs.components.c_scroll import CScroll
+from src.ecs.components.c_boss import CBoss
+from src.ecs.components.c_base_turrets import CBaseTurrets
 from src.ecs.components.tags.c_tag_god_mode import CTagGodMode
 from src.ecs.components.tags.c_tag_boost_item import CTagBoostItem
 from src.ecs.components.tags.c_tag_pause import CTagPause
@@ -219,6 +221,7 @@ def _create_enemy_base_object(
         eye_frames,
         node_frames,
         orientation=enemy_base_cfg.get("orientation", "horizontal"),
+        scale=enemy_base_cfg.get("scale", 1),
     )
     eye = CEnemyBaseEye(None, eye_frames)
     combat.eye_frame_index = eye.open_frame
@@ -232,6 +235,35 @@ def _create_enemy_base_object(
     world.add_component(entity, eye)
     world.add_component(entity, combat)
     world.add_component(entity, CBaseCore(enemy_base_cfg.get("core_mode", "cycle")))
+    return entity
+
+
+def create_boss(world:esper.World, boss_cfg:dict, core_pos:pygame.Vector2,
+                font_path:str) -> int:
+    """MOTHER BASE: base escalada con nucleo cerrado, torretas en rafaga, radar y barra de vida"""
+    entity = _create_enemy_base_object(world, {
+        "image": boss_cfg["image"], "scale": boss_cfg["scale"],
+        "orientation": boss_cfg["orientation"], "core_mode": "open",
+        "base_score": boss_cfg["score"], "node_score": boss_cfg["node_score"],
+        "position": {"x": core_pos.x, "y": core_pos.y}})
+    combat = world.component_for_entity(entity, CEnemyBaseCombat)
+    combat.eye_frame_index = boss_cfg["closed_eye_frame"]
+    c_s = world.component_for_entity(entity, CSurface)
+    c_s.surf = combat.compose()
+    c_s.area = c_s.surf.get_rect()
+    turrets = boss_cfg["turrets"]
+    world.add_component(entity, CBaseTurrets(len(combat.node_centers), turrets["interval_min"],
+                                             turrets["interval_max"], turrets["burst"],
+                                             turrets["burst_gap"]))
+    radar = boss_cfg["radar"]
+    create_radar_dot(world, entity, radar["dot_size"], radar["color"])
+
+    bar = boss_cfg["bar"]
+    create_text(world, bar["label"], font_path, bar["size"], bar["label_color"],
+                bar["label_position"], "left", layer=5)
+    create_rect(world, bar["position"], bar["bar_size"], bar["back_color"], layer=5)
+    fill = create_rect(world, bar["position"], bar["bar_size"], bar["color"], layer=6)
+    world.add_component(entity, CBoss(boss_cfg["core_hp"], fill, bar["bar_size"]["w"]))
     return entity
 
 

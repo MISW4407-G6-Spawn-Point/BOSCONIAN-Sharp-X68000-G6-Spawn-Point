@@ -4,7 +4,7 @@ import pygame
 
 from src.create.prefab_creator import (create_blast_off, create_camera, create_enemy_spawner,
                                        create_hud, create_input_play, create_level_objects,
-                                       create_god_mode_text, create_pause_menu,
+                                       create_boss, create_god_mode_text, create_pause_menu,
                                        create_pause_page,
                                        create_player_bullets,
                                        create_player_ship, create_radar_dot,
@@ -40,6 +40,7 @@ from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_cutscene import system_cutscene
 from src.ecs.systems.s_scroll import system_scroll
+from src.ecs.systems.s_boss import system_boss
 from src.ecs.components.tags.c_tag_god_mode import CTagGodMode
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
@@ -177,10 +178,18 @@ class PlayScene(Scene):
                 )
         create_enemy_spawner(self.ecs_world, self._level_cfg.get(
             "enemy_spawn", self._scaled_enemy_spawn()))
-        create_timed_spawner(self.ecs_world, "formation",
-                             self._scaled(self._difficulty_cfg["formation_interval"]))
-        create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
-                             self._scaled(self._difficulty_cfg["spy_chance"]))
+        if self._level_cfg.get("formations", True):
+            create_timed_spawner(self.ecs_world, "formation",
+                                 self._scaled(self._difficulty_cfg["formation_interval"]))
+        if self._level_cfg.get("spy", True):
+            create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
+                                 self._scaled(self._difficulty_cfg["spy_chance"]))
+        self._boss_cfg = ServiceLocator.configs_service.get("assets/cfg/boss.json")
+        if self._session.is_boss_round():
+            offset = self._boss_cfg["spawn_offset"]
+            core = pygame.Vector2((self._player_start["x"] + offset["x"]) % self._world_size["w"],
+                                  (self._player_start["y"] + offset["y"]) % self._world_size["h"])
+            create_boss(self.ecs_world, self._boss_cfg, core, self._font)
         self._special_shot = special_shot
         create_blast_off(self.ecs_world, interface_cfg["blast_off"], self._font,
                          DIRECTIONS[self._p_ship.dir_index])
@@ -194,7 +203,10 @@ class PlayScene(Scene):
     def _play_level_music(self):
         """Pista de la ronda actual (ciclo de music.json "levels")"""
         tracks = self._music_cfg.get("levels")
-        if tracks:
+        if self._session.is_boss_round() and self._music_cfg.get("boss"):
+            music = self._music_cfg["boss"]
+            ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
+        elif tracks:
             music = tracks[(self._session.level - 1) % len(tracks)]
             ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
 
@@ -202,7 +214,7 @@ class PlayScene(Scene):
         """Suena una vez por cambio; en ROJA cambia la musica"""
         ServiceLocator.sounds_service.play_cfg(self._alerts_cfg.get("sounds", {}).get(phase))
         red_music = self._music_cfg.get("red_alert")
-        if phase == "RED" and red_music:
+        if phase == "RED" and red_music and not self._session.is_boss_round():
             ServiceLocator.sounds_service.play_music(red_music["track"], red_music["volume"])
 
     def _scaled(self, rule:dict) -> float:
@@ -226,6 +238,8 @@ class PlayScene(Scene):
                 for obstacle_type, count in obstacles_cfg["default_counts"].items()}
 
     def _level_name(self, levels_cfg:dict) -> str:
+        if self._session.is_boss_round():
+            return "boss"
         for name in (f"round{self._session.level}", f"level{self._session.level}"):
             if name in levels_cfg:
                 return name
@@ -234,7 +248,9 @@ class PlayScene(Scene):
 
     def _has_next_level(self) -> bool:
         next_level = self._session.level + 1
-        return f"round{next_level}" in self._levels_cfg or f"level{next_level}" in self._levels_cfg
+        boss_round = self._levels_cfg.get("boss", {}).get("round")
+        return f"round{next_level}" in self._levels_cfg or \
+            f"level{next_level}" in self._levels_cfg or next_level == boss_round
 
     def do_update(self, delta_time:float):
         system_blink(self.ecs_world, delta_time)
@@ -267,6 +283,9 @@ class PlayScene(Scene):
         system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size)
         system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
                             self._enemy_bullet_cfg, delta_time)
+        system_boss(self.ecs_world, self._player_entity, self._world_size, self._boss_cfg,
+                    self._enemies_cfg, self._enemy_bullet_cfg, self._explosion_cfg,
+                    self._player_cfg["max_speed"], delta_time)
         system_movement(self.ecs_world, delta_time)
         system_boost_item(self.ecs_world, self._player_entity, self._special_cfg,
                           self._world_size, self._radar_cfg, delta_time)
@@ -313,7 +332,8 @@ class PlayScene(Scene):
     def _next_level(self):
         if self._has_next_level():
             self._session.level += 1
-            self.switch_scene("PLAY_SCENE")
+            self.switch_scene(self._scenes_cfg["boss_scene"] if self._session.is_boss_round()
+                              else "PLAY_SCENE")
         else:
             self.switch_scene(self._scenes_cfg["victory_scene"])
 

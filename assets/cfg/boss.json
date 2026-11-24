@@ -1,0 +1,30 @@
+{
+    "name": "MOTHER BASE",
+    "image": "assets/img/naves.png",
+    "scale": 2,
+    "orientation": "horizontal",
+    "spawn_offset": {"x": 0, "y": -300},
+    "score": 10000,
+    "node_score": 300,
+    "core_hp": 12,
+    "closed_eye_frame": 3,
+    "movement": {"max_speed": 28, "max_force": 20, "keep_distance": 110, "slow_radius": 120},
+    "turrets": {"interval_min": 1.2, "interval_max": 2.4, "burst": 3, "burst_gap": 0.15},
+    "launch_interval": 2.5,
+    "fan": {"interval": 1.8, "count": 5, "spread": 60},
+    "death": {
+        "time": 1.6,
+        "explosion_interval": 0.1
+    },
+    "radar": {"dot_size": {"w": 5, "h": 5}, "color": {"r": 255, "g": 80, "b": 255}},
+    "bar": {
+        "label": "BOSS",
+        "size": 8,
+        "label_color": {"r": 255, "g": 80, "b": 255},
+        "label_position": {"x": 92, "y": 4},
+        "position": {"x": 128, "y": 5},
+        "bar_size": {"w": 104, "h": 6},
+        "back_color": {"r": 70, "g": 0, "b": 70},
+        "color": {"r": 255, "g": 80, "b": 255}
+    }
+}

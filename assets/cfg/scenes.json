@@ -44,6 +44,7 @@
     },
     "PLAY_SCENE": {
         "back_scene": "TITLE_SCENE",
+        "boss_scene": "LEVEL_SCENE",
         "game_over_scene": "GAME_OVER_SCENE",
         "victory_scene": "VICTORY_SCENE"
     },

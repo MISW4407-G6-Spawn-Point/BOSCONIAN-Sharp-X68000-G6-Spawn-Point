@@ -25,6 +25,7 @@ class CEnemyBaseCombat:
         node_frames: list,
         node_centers=DEFAULT_MODULE_CENTERS,
         orientation: str = "horizontal",
+        scale: float = 1,
     ) -> None:
         self.left_support, self.right_support = supports
         self.left_connector, self.right_connector = connectors
@@ -35,6 +36,7 @@ class CEnemyBaseCombat:
         self.node_destroyed = [False] * 6
         self.eye_frame_index = 0
         self.orientation = orientation
+        self.scale = scale
 
     def compose(self) -> pygame.Surface:
         """Compone cada nodo avanzando un estado visual por impacto."""
@@ -58,24 +60,28 @@ class CEnemyBaseCombat:
         )
         if self.orientation == "vertical":
             surface = pygame.transform.rotate(surface, 90)
+        if self.scale != 1:
+            surface = pygame.transform.scale_by(surface, self.scale)
         return surface
 
     def _local_point(self, point:pygame.Vector2) -> pygame.Vector2:
         """Punto de la base horizontal llevado a la orientacion real"""
         if self.orientation == "vertical":
-            return pygame.Vector2(point.y, BASE_SIZE[0] - point.x)
-        return pygame.Vector2(point)
+            return pygame.Vector2(point.y, BASE_SIZE[0] - point.x) * self.scale
+        return pygame.Vector2(point) * self.scale
 
     def _local_rect(self, rect:pygame.Rect, base_pos:pygame.Vector2) -> pygame.Rect:
         """Rect de la base horizontal llevado a la orientacion real y al mundo"""
         if self.orientation == "vertical":
             rect = pygame.Rect(rect.y, BASE_SIZE[0] - rect.x - rect.w, rect.h, rect.w)
+        if self.scale != 1:
+            rect = pygame.Rect(round(rect.x * self.scale), round(rect.y * self.scale),
+                               round(rect.w * self.scale), round(rect.h * self.scale))
         return rect.move(round(base_pos.x), round(base_pos.y))
 
     def get_size(self) -> tuple:
-        if self.orientation == "vertical":
-            return (BASE_SIZE[1], BASE_SIZE[0])
-        return BASE_SIZE
+        size = (BASE_SIZE[1], BASE_SIZE[0]) if self.orientation == "vertical" else BASE_SIZE
+        return (round(size[0] * self.scale), round(size[1] * self.scale))
 
     def get_core_offset(self) -> pygame.Vector2:
         """Centro del nucleo relativo a la posicion de la base"""

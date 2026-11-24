@@ -36,4 +36,9 @@ def system_base_turrets(world:esper.World, player_entity:int, world_size:dict,
             if c_bt.timers[index] <= 0:
                 create_enemy_bullet(world, turret_center, to_player.normalize(),
                                     enemy_bullet_cfg)
-                c_bt.timers[index] = random.uniform(c_bt.interval_min, c_bt.interval_max)
+                c_bt.shots_left[index] -= 1
+                if c_bt.shots_left[index] > 0:
+                    c_bt.timers[index] = c_bt.burst_gap
+                else:
+                    c_bt.shots_left[index] = c_bt.burst
+                    c_bt.timers[index] = random.uniform(c_bt.interval_min, c_bt.interval_max)

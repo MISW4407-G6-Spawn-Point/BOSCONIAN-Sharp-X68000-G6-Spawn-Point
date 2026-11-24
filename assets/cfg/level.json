@@ -1107,5 +1107,16 @@
                 "score": 70
             }
         ]
+    },
+    "boss": {
+        "round": 11,
+        "special_shot": true,
+        "boost_item_chance": 0.7,
+        "condition": {"yellow": 6, "red": 60},
+        "formations": false,
+        "spy": false,
+        "enemy_bases": [],
+        "obstacles": {"1-a": 4, "1-b": 4, "1-c": 4, "2-a": 4, "2-b": 4, "2-c": 4, "mine": 6, "indestructible": 0},
+        "enemies": []
     }
 }
