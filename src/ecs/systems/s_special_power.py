@@ -1,43 +1,55 @@
 import esper
 import pygame
 
-from src.create.prefab_creator import create_explosion
-from src.ecs.components.c_camera import CCamera
-from src.ecs.components.c_level_object import CLevelObject
-from src.ecs.components.c_score_display import CScoreDisplay
+from src.create.prefab_creator import create_boost_trail
+from src.ecs.components.c_player_ship import CPlayerShip
+from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_special_power import CSpecialPower
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
-from src.ecs.components.c_velocity import CVelocity
-from src.ecs.systems.s_camera import world_to_screen
-from src.ecs.systems.s_mine_explosion import explode_mine
+from src.engine.service_locator import ServiceLocator
 
 
-def system_special_power(world: esper.World, player_entity: int, camera: CCamera,
-                        special_cfg: dict, explosion_cfg: dict):
-    """Poder especial: destruye todo lo destruible que se ve en pantalla y suma sus puntos.
-    Las bases enemigas no se tocan. Gasta un uso."""
+def activate_boost(world: esper.World, player_entity: int, special_cfg: dict) -> bool:
+    """X: gasta una carga y sube la velocidad maxima (no destruye nada)"""
     c_sp = world.component_for_entity(player_entity, CSpecialPower)
-    if c_sp.uses_left <= 0:
+    if c_sp.charges <= 0 or c_sp.time_left > 0 or c_sp.cooldown_left > 0:
+        return False
+    c_sp.charges -= 1
+    c_sp.time_left = special_cfg["duration"]
+    c_p = world.component_for_entity(player_entity, CPlayerShip)
+    c_p.max_speed = c_sp.normal_speed * special_cfg["speed_multiplier"]
+    c_p.speed = c_p.max_speed  # acelera de inmediato
+    ServiceLocator.sounds_service.play_cfg(special_cfg.get("sound"))
+    return True
+
+
+def _end_boost(c_sp: CSpecialPower, c_p: CPlayerShip, cooldown: float):
+    c_sp.time_left = 0.0
+    c_sp.cooldown_left = cooldown
+    c_p.max_speed = c_sp.normal_speed  # system_player_ship frena suave
+
+
+def system_special_power(world: esper.World, player_entity: int, special_cfg: dict,
+                         delta_time: float):
+    """Temporizadores del BOOST y estela mientras esta activo"""
+    c_sp = world.component_for_entity(player_entity, CSpecialPower)
+    c_p = world.component_for_entity(player_entity, CPlayerShip)
+    c_sp.cooldown_left = max(0.0, c_sp.cooldown_left - delta_time)
+    if c_sp.time_left <= 0:
         return
-    c_sp.uses_left -= 1
+    if world.component_for_entity(player_entity, CPlayerState).state != PlayerState.ALIVE:
+        _end_boost(c_sp, c_p, special_cfg["cooldown"])
+        return
+    c_sp.time_left -= delta_time
+    if c_sp.time_left <= 0:
+        _end_boost(c_sp, c_p, special_cfg["cooldown"])
+        return
 
-    for entity, (c_lo, c_t, c_s) in world.get_components(CLevelObject, CTransform, CSurface):
-        if c_lo.object_type not in special_cfg["targets"]:
-            continue
-        screen_rect = pygame.Rect(world_to_screen(camera, c_t.pos), c_s.area.size)
-        if not camera.view.colliderect(screen_rect):
-            continue
-        _add_score(world, c_lo.score)
-        if c_lo.object_type == "mine":
-            explode_mine(world, entity, explosion_cfg)
-            continue
-        create_explosion(world, c_t.pos + pygame.Vector2(c_s.area.size) / 2, explosion_cfg,
-                         world.component_for_entity(entity, CVelocity).vel)
-        world.delete_entity(entity)
-
-
-def _add_score(world: esper.World, points: int):
-    for _, score_display in world.get_component(CScoreDisplay):
-        if score_display.tracks_score:
-            score_display.value += points
+    trail = special_cfg["trail"]
+    c_sp.trail_timer -= delta_time
+    if c_sp.trail_timer <= 0:
+        c_sp.trail_timer = trail["interval"]
+        c_t = world.component_for_entity(player_entity, CTransform)
+        c_s = world.component_for_entity(player_entity, CSurface)
+        create_boost_trail(world, c_t.pos + pygame.Vector2(c_s.area.size) / 2, trail)

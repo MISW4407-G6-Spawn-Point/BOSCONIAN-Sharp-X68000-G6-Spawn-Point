@@ -1,4 +1,21 @@
 {
-    "uses_per_level": 2,
-    "targets": ["1-a", "1-b", "1-c", "2-a", "2-b", "2-c", "i", "p", "e", "mine", "spy"]
+    "name": "BOOST",
+    "speed_multiplier": 2.0,
+    "duration": 4.0,
+    "cooldown": 1.0,
+    "start_charges": 1,
+    "max_charges": 3,
+    "sound": null,
+    "trail": {"size": 2, "color": {"r": 120, "g": 200, "b": 255}, "interval": 0.03, "lifetime": 0.25},
+    "item": {
+        "size": 6,
+        "colors": [{"r": 0, "g": 255, "b": 255}, {"r": 255, "g": 0, "b": 255}],
+        "blink_time": 0.15,
+        "lifetime": 15.0,
+        "radar_color": {"r": 0, "g": 255, "b": 255},
+        "interval": 20.0,
+        "chance": 0.5,
+        "spawn_distance": {"min": 60, "max": 160},
+        "pickup_sound": {"path": "assets/snd/extra_life.ogg", "volume": 0.9}
+    }
 }

@@ -1,6 +1,7 @@
 {
     "level1": {
         "special_shot": false,
+        "boost_item_chance": 0.7,
         "condition": {"yellow": 8, "red": 90},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 896, "y": 513}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
@@ -161,6 +162,7 @@
     },
     "level2": {
         "special_shot": true,
+        "boost_item_chance": 0.65,
         "condition": {"yellow": 7, "red": 85},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 1026, "y": 1752}, "orientation": "horizontal", "core_mode": "open", "base_score": 1500, "node_score": 200},
@@ -262,6 +264,7 @@
     },
     "level3": {
         "special_shot": true,
+        "boost_item_chance": 0.6,
         "condition": {"yellow": 7, "red": 80},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 1135, "y": 1837}, "orientation": "vertical", "core_mode": "open", "base_score": 1500, "node_score": 200},
@@ -364,6 +367,7 @@
     },
     "level4": {
         "special_shot": true,
+        "boost_item_chance": 0.6,
         "condition": {"yellow": 6, "red": 75},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 723, "y": 1713}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -467,6 +471,7 @@
     },
     "level5": {
         "special_shot": true,
+        "boost_item_chance": 0.55,
         "condition": {"yellow": 6, "red": 70},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 574, "y": 739}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -571,6 +576,7 @@
     },
     "level6": {
         "special_shot": true,
+        "boost_item_chance": 0.55,
         "condition": {"yellow": 5, "red": 65},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 309, "y": 1472}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -676,6 +682,7 @@
     },
     "level7": {
         "special_shot": true,
+        "boost_item_chance": 0.5,
         "condition": {"yellow": 5, "red": 60},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 1261, "y": 1339}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -782,6 +789,7 @@
     },
     "level8": {
         "special_shot": true,
+        "boost_item_chance": 0.5,
         "condition": {"yellow": 4, "red": 55},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 82, "y": 1376}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -888,6 +896,7 @@
     },
     "level9": {
         "special_shot": true,
+        "boost_item_chance": 0.45,
         "condition": {"yellow": 4, "red": 50},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 332, "y": 1504}, "orientation": "vertical", "core_mode": "cycle", "base_score": 1500, "node_score": 200},
@@ -994,6 +1003,7 @@
     },
     "level10": {
         "special_shot": true,
+        "boost_item_chance": 0.45,
         "condition": {"yellow": 3, "red": 45},
         "enemy_bases": [
             {"image": "assets/img/naves.png", "position": {"x": 875, "y": 1719}, "orientation": "horizontal", "core_mode": "cycle", "base_score": 1500, "node_score": 200},

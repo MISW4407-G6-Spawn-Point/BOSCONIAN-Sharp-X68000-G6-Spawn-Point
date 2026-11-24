@@ -28,6 +28,8 @@ from src.ecs.components.c_score_display import CScoreDisplay
 from src.ecs.components.c_sprite_animation import CSpriteAnimation
 from src.ecs.components.tags.c_tag_hide_on_pause import CTagHideOnPause
 from src.ecs.components.c_cutscene import CCutscene
+from src.ecs.components.c_boost_item_spawner import CBoostItemSpawner
+from src.ecs.components.tags.c_tag_boost_item import CTagBoostItem
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.create.enemy_base_composer import enemy_base_composer
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
@@ -811,6 +813,37 @@ def create_blast_off(world:esper.World, blast_cfg:dict, font_path:str,
     return text_entity
 
 
+def create_boost_item(world:esper.World, pos:pygame.Vector2, item_cfg:dict) -> int:
+    """Capsula del BOOST: cuadrado que alterna entre dos colores y se borra sola"""
+    size = pygame.Vector2(item_cfg["size"], item_cfg["size"])
+    colors = item_cfg["colors"]
+    c_surface = CSurface(size, _color(colors[0]))
+    item = create_sprite(world, pos, pygame.Vector2(0, 0), c_surface.surf)
+    blink = CBlink(c_surface.surf, item_cfg["blink_time"])
+    blink.off_surf = CSurface(size, _color(colors[-1])).surf
+    world.add_component(item, blink)
+    world.add_component(item, CLifetime(item_cfg["lifetime"]))
+    world.add_component(item, CTagWorld())
+    world.add_component(item, CTagBoostItem())
+    return item
+
+
+def create_boost_trail(world:esper.World, center:pygame.Vector2, trail_cfg:dict) -> int:
+    """Punto de la estela del BOOST"""
+    size = pygame.Vector2(trail_cfg["size"], trail_cfg["size"])
+    c_surface = CSurface(size, _color(trail_cfg["color"]))
+    trail = create_sprite(world, center - size / 2, pygame.Vector2(0, 0), c_surface.surf)
+    world.add_component(trail, CLifetime(trail_cfg["lifetime"]))
+    world.add_component(trail, CTagWorld())
+    return trail
+
+
+def create_boost_item_spawner(world:esper.World, interval:float, chance:float) -> int:
+    spawner = world.create_entity()
+    world.add_component(spawner, CBoostItemSpawner(interval, chance))
+    return spawner
+
+
 def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:
     """Aviso de arma especial al iniciar el nivel: titila y se borra a los 'duration' segundos"""
     text_entity = create_text(world, msg_cfg["text"], font_path, msg_cfg["size"],
@@ -1013,9 +1046,10 @@ def create_icon(world:esper.World, image_path:str, area:dict, center:dict) -> in
     world.add_component(icon_entity, CTagUI(1))
     return icon_entity
 
-def create_special_hud(world:esper.World, special_cfg:dict, font_path:str, uses:int) -> None:
+def create_special_hud(world:esper.World, special_cfg:dict, font_path:str, uses:int,
+                       label:str = None) -> None:
     """Contador del poder especial en el panel derecho (solo en la escena de juego)."""
-    create_text(world, special_cfg["text"], font_path, special_cfg["size"],
+    create_text(world, label or special_cfg["text"], font_path, special_cfg["size"],
                 special_cfg["color"], special_cfg["label_position"], "left")
     value_pos = special_cfg["value_position"]
     value_entity = create_text(world, str(uses), font_path, special_cfg["size"],

@@ -6,7 +6,7 @@ from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
 
 
 def system_special_hud(world: esper.World, player_entity: int):
-    """Copia los usos restantes del poder especial al numero del HUD."""
+    """Copia las cargas del BOOST al numero del HUD."""
     c_sp = world.component_for_entity(player_entity, CSpecialPower)
     for _, (c_sd, _) in world.get_components(CScoreDisplay, CTagSpecialDisplay):
-        c_sd.value = c_sp.uses_left
+        c_sd.value = c_sp.charges

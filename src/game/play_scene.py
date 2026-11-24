@@ -10,6 +10,7 @@ from src.create.prefab_creator import (create_blast_off, create_camera, create_e
                                        create_starfield,
                                        create_timed_spawner,
                                        create_special_hud, create_special_shot_message,
+                                       create_boost_item_spawner,
                                        player_shot_angles)
 from src.ecs.components.c_base_turrets import CBaseTurrets
 from src.ecs.components.c_camera import CCamera
@@ -62,7 +63,8 @@ from src.ecs.systems.s_score_popup import system_score_popup
 from src.ecs.systems.s_spy import system_spy
 from src.ecs.systems.s_timed_spawner import system_timed_spawner
 from src.ecs.components.c_special_power import CSpecialPower
-from src.ecs.systems.s_special_power import system_special_power, system_special_power
+from src.ecs.systems.s_special_power import activate_boost, system_special_power
+from src.ecs.systems.s_boost_item import system_boost_item
 from src.ecs.systems.s_special_hud import system_special_hud
 
 # Comando -> eje que suma a la entrada de la nave
@@ -122,7 +124,9 @@ class PlayScene(Scene):
         self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
                                                 self._player_start)
         self.ecs_world.add_component(self._player_entity,
-                                    CSpecialPower(self._special_cfg["uses_per_level"]))
+                                    CSpecialPower(self._special_cfg["start_charges"],
+                                                  self._special_cfg["max_charges"],
+                                                  self._player_cfg["max_speed"]))
         # habilidad especial del nivel: disparo de 4 balas (3 al frente y 1 atras)
         special_shot = self._level_cfg.get("special_shot", False)
         self.ecs_world.add_component(self._player_entity, CPlayerWeapon(special_shot))
@@ -147,7 +151,10 @@ class PlayScene(Scene):
             self._session.lives,
         )
         create_special_hud(self.ecs_world, interface_cfg["hud"]["special"], interface_cfg["font"],
-                self._special_cfg["uses_per_level"])
+                           self._special_cfg["start_charges"], self._special_cfg["name"])
+        item_cfg = self._special_cfg["item"]
+        create_boost_item_spawner(self.ecs_world, item_cfg["interval"],
+                                  self._level_cfg.get("boost_item_chance", item_cfg["chance"]))
         create_radar_dot(self.ecs_world, self._player_entity,
                         self._radar_cfg["dot_size"], self._radar_cfg["player_color"])
         for entity in level_entities:
@@ -245,6 +252,7 @@ class PlayScene(Scene):
         system_base_core(self.ecs_world, self._player_entity, self._world_size,
                          self._enemies_cfg, self._player_cfg["max_speed"])
         system_sprite_animation(self.ecs_world, delta_time)
+        system_special_power(self.ecs_world, self._player_entity, self._special_cfg, delta_time)
         system_player_ship(self.ecs_world, delta_time)
         system_enemy_spawner(self.ecs_world, self._player_entity, self._enemies_cfg,
                              self._world_size, self._player_cfg["max_speed"], delta_time)
@@ -260,6 +268,8 @@ class PlayScene(Scene):
         system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
                             self._enemy_bullet_cfg, delta_time)
         system_movement(self.ecs_world, delta_time)
+        system_boost_item(self.ecs_world, self._player_entity, self._special_cfg,
+                          self._world_size, self._radar_cfg, delta_time)
         system_collision_indestructible(self.ecs_world, self._player_entity, self._world_size,
                                         self._explosion_cfg, self._god_mode,
                                         self._on_player_hit)
@@ -414,8 +424,7 @@ class PlayScene(Scene):
                                       angles)
 
         elif action.name == "PLAYER_SPECIAL" and self._can_act():
-            system_special_power(self.ecs_world, self._player_entity, self._camera,
-                                self._special_cfg, self._explosion_cfg)
+            activate_boost(self.ecs_world, self._player_entity, self._special_cfg)
         # --- Modo trampa (ver README) ---
         elif action.name == "CHEAT_NEXT_LEVEL":
             self._next_level()

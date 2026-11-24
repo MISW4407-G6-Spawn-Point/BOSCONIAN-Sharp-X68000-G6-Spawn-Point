@@ -37,5 +37,9 @@ def system_player_ship(world:esper.World, delta_time:float):
                 c_t.pos = center - pygame.Vector2(c_s.area.size) / 2
 
         #siempre avanza, acelerando suave hasta la maxima
-        c_p.speed = min(c_p.max_speed, c_p.speed + c_p.acceleration * delta_time)
+        if c_p.speed > c_p.max_speed:
+            # al terminar el BOOST frena suave hasta la maxima normal
+            c_p.speed = max(c_p.max_speed, c_p.speed - c_p.acceleration * delta_time)
+        else:
+            c_p.speed = min(c_p.max_speed, c_p.speed + c_p.acceleration * delta_time)
         c_v.vel = DIRECTIONS[c_p.dir_index] * c_p.speed

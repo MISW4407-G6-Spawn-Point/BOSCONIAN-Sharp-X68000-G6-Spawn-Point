@@ -62,7 +62,7 @@
                     "",
                     "ARROWS  TURN / MOVE",
                     "Z       FIRE",
-                    "X       SPECIAL ATTACK",
+                    "X       SPEED BOOST",
                     "P       PAUSE",
                     "ESC     BACK TO TITLE"
             ]},
@@ -77,7 +77,10 @@
                     "",
                     "FROM ROUND 2 THE SHIP",
                     "FIRES A SPECIAL WEAPON:",
-                    "3 SHOTS AHEAD, 1 BEHIND."
+                    "3 SHOTS AHEAD, 1 BEHIND.",
+                    "",
+                    "BOOST DOUBLES YOUR SPEED.",
+                    "CAPSULE GIVES +1 (MAX 3)."
             ]}
         ]
     },

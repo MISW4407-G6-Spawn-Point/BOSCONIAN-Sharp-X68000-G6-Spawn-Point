@@ -35,7 +35,7 @@ python -m pygbag .       (navegador, http://localhost:8000)
 |-------|--------|
 | Flechas | Girar / mover la nave (8 direcciones) |
 | Z | Disparar |
-| X | Poder especial |
+| X | BOOST: súper velocidad (no letal) |
 | P | Pausa |
 | ESC | Volver al título (en juego y desde instrucciones/créditos) |
 | Enter / Z (menús) | Empezar partida |
