@@ -27,6 +27,7 @@ from src.ecs.components.c_explosion import CExplosion
 from src.ecs.components.c_score_display import CScoreDisplay
 from src.ecs.components.c_sprite_animation import CSpriteAnimation
 from src.ecs.components.tags.c_tag_hide_on_pause import CTagHideOnPause
+from src.ecs.components.c_cutscene import CCutscene
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.create.enemy_base_composer import enemy_base_composer
 from src.ecs.components.c_enemy_spawner import CEnemySpawner
@@ -794,6 +795,20 @@ def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path
                                 hint_cfg["color"], hint_cfg["position"], layer=3))
     for entity in entities:
         world.add_component(entity, CTagPause())
+
+
+def create_blast_off(world:esper.World, blast_cfg:dict, font_path:str,
+                     direction:pygame.Vector2) -> int:
+    """Texto BLAST OFF! que titila; lleva la CCutscene que congela el juego"""
+    text_entity = create_text(world, blast_cfg["text"], font_path, blast_cfg["size"],
+                              blast_cfg["color"], blast_cfg["position"], layer=3)
+    if blast_cfg["blink_time"] > 0:
+        c_s = world.component_for_entity(text_entity, CSurface)
+        world.add_component(text_entity, CBlink(c_s.surf, blast_cfg["blink_time"]))
+    world.add_component(text_entity, CCutscene(blast_cfg["duration"], blast_cfg["star_speed"],
+                                               blast_cfg["slowdown_time"], direction))
+    world.add_component(text_entity, CTagHideOnPause())
+    return text_entity
 
 
 def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:

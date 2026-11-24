@@ -2,8 +2,8 @@
 
 import pygame
 
-from src.create.prefab_creator import (create_camera, create_enemy_spawner, create_hud,
-                                       create_input_play, create_level_objects,
+from src.create.prefab_creator import (create_blast_off, create_camera, create_enemy_spawner,
+                                       create_hud, create_input_play, create_level_objects,
                                        create_pause_menu, create_pause_page,
                                        create_player_bullets,
                                        create_player_ship, create_radar_dot,
@@ -14,6 +14,7 @@ from src.create.prefab_creator import (create_camera, create_enemy_spawner, crea
 from src.ecs.components.c_base_turrets import CBaseTurrets
 from src.ecs.components.c_camera import CCamera
 from src.ecs.components.c_condition_display import CConditionDisplay
+from src.ecs.components.c_cutscene import CCutscene
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_level_object import CLevelObject
@@ -35,6 +36,7 @@ from src.ecs.systems.s_collision_indestructible import system_collision_indestru
 from src.ecs.systems.s_mine_explosion import system_mine_explosion
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
+from src.ecs.systems.s_cutscene import system_cutscene
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_enemy_state import system_enemy_state
@@ -43,7 +45,7 @@ from src.ecs.systems.s_hi_score import system_hi_score
 from src.ecs.systems.s_lifetime import system_lifetime
 from src.ecs.systems.s_lives_hud import system_lives_hud
 from src.ecs.systems.s_movement import system_movement
-from src.ecs.systems.s_player_ship import system_player_ship
+from src.ecs.systems.s_player_ship import DIRECTIONS, system_player_ship
 from src.ecs.systems.s_player_state import kill_player, respawn_player, system_player_state
 from src.ecs.systems.s_radar import system_radar
 from src.ecs.systems.s_rendering import system_rendering
@@ -170,9 +172,10 @@ class PlayScene(Scene):
                              self._scaled(self._difficulty_cfg["formation_interval"]))
         create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
                              self._scaled(self._difficulty_cfg["spy_chance"]))
-        if special_shot:
-            create_special_shot_message(self.ecs_world, interface_cfg["special_shot_message"],
-                                        interface_cfg["font"])
+        # BLAST OFF!: el mensaje del arma especial sale al terminar (_on_cutscene_end)
+        self._special_shot = special_shot
+        create_blast_off(self.ecs_world, interface_cfg["blast_off"], self._font,
+                         DIRECTIONS[self._p_ship.dir_index])
         create_input_play(self.ecs_world)
         self._music_cfg = ServiceLocator.configs_service.get("assets/cfg/music.json")
         self._play_level_music()
@@ -230,6 +233,13 @@ class PlayScene(Scene):
         if self._paused:
             self._update_pause_page(delta_time)
             return  # en pausa solo titilan las estrellas
+        star_offset = system_cutscene(self.ecs_world, delta_time, self._on_cutscene_end)
+        if star_offset is not None:
+            # BLAST OFF!: solo se mueven las estrellas, el juego no avanza
+            system_star_parallax(self.ecs_world, star_offset)
+            system_star_wrap(self.ecs_world, self._play_area)
+            system_score_display(self.ecs_world)
+            return
         system_condition(self.ecs_world, delta_time, self._on_condition_change)
         system_enemy_base_eye(self.ecs_world, delta_time)
         system_base_core(self.ecs_world, self._player_entity, self._world_size,
@@ -296,6 +306,16 @@ class PlayScene(Scene):
             self.switch_scene("PLAY_SCENE")
         else:
             self.switch_scene(self._scenes_cfg["victory_scene"])
+
+    def _on_cutscene_end(self):
+        if self._special_shot:
+            create_special_shot_message(self.ecs_world, self._interface_cfg["special_shot_message"],
+                                        self._font)
+
+    def _can_act(self) -> bool:
+        """Dispara/usa especial solo vivo y fuera del BLAST OFF"""
+        return self._p_state.state == PlayerState.ALIVE and \
+            not self.ecs_world.get_component(CCutscene)
 
     def _on_player_hit(self):
         kill_player(self.ecs_world, self._player_entity,
@@ -385,7 +405,7 @@ class PlayScene(Scene):
         if self._paused or action.phase != CommandPhase.STARTED:
             return
 
-        if action.name == "PLAYER_FIRE" and self._p_state.state == PlayerState.ALIVE:
+        if action.name == "PLAYER_FIRE" and self._can_act():
             num_bullets = len(self.ecs_world.get_component(CTagBullet))
             # 2 balas normal, 4 con el disparo especial del nivel
             angles = player_shot_angles(self.ecs_world, self._player_entity, self._bullet_cfg)
@@ -393,7 +413,7 @@ class PlayScene(Scene):
                 create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg,
                                       angles)
 
-        elif action.name == "PLAYER_SPECIAL" and self._p_state.state == PlayerState.ALIVE:
+        elif action.name == "PLAYER_SPECIAL" and self._can_act():
             system_special_power(self.ecs_world, self._player_entity, self._camera,
                                 self._special_cfg, self._explosion_cfg)
         # --- Modo trampa (ver README) ---

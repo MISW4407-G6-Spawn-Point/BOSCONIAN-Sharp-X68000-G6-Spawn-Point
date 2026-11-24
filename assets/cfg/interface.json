@@ -140,6 +140,16 @@
         },
         "page_hint": {"text": "P: BACK", "size": 8, "color": {"r": 160, "g": 160, "b": 160}, "position": {"x": 120, "y": 216}}
     },
+    "blast_off": {
+        "text": "BLAST OFF!",
+        "size": 8,
+        "color": {"r": 255, "g": 255, "b": 255},
+        "position": {"x": 120, "y": 96},
+        "blink_time": 0.2,
+        "duration": 2.0,
+        "star_speed": 420,
+        "slowdown_time": 0.6
+    },
     "special_shot_message": {
         "text": "SPECIAL WEAPON!",
         "size": 8,
