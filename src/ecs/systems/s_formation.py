@@ -78,6 +78,13 @@ def system_formation(world:esper.World, player_entity:int, world_size:dict,
         world.delete_entity(group_entity)
 
 
+def forfeit_formation_bonus(world:esper.World, entity:int):
+    """La nave no la derribo el jugador: su formacion ya no da bono"""
+    for _, group in world.get_component(CFormationGroup):
+        if entity in group.members:
+            group.escaped = True
+
+
 def _set_sprite(c_t:CTransform, c_s:CSurface, ship, heading:pygame.Vector2):
     """Uno de los 8 sprites pre-rotados segun la direccion (igual que la nave)."""
     angle = math.degrees(math.atan2(heading.x, -heading.y)) % 360

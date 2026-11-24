@@ -19,6 +19,8 @@ class TitleScene(Scene):
         scenes_cfg = ServiceLocator.configs_service.get("assets/cfg/scenes.json")
         font = interface_cfg["font"]
         self._start_scene = scenes_cfg["TITLE_SCENE"]["start_scene"]
+        self._instructions_scene = scenes_cfg["TITLE_SCENE"]["instructions_scene"]
+        self._credits_scene = scenes_cfg["TITLE_SCENE"]["credits_scene"]
         self._play_area = interface_cfg["play_area"]
         # Volver al titulo siempre empieza una partida nueva
         session = self._game_engine.session
@@ -39,5 +41,11 @@ class TitleScene(Scene):
         system_scene_timer(self.ecs_world, delta_time, self.switch_scene)
 
     def do_action(self, action:CInputCommand):
-        if action.name == "START_GAME" and action.phase == CommandPhase.STARTED:
+        if action.phase != CommandPhase.STARTED:
+            return
+        if action.name == "START_GAME":
             self.switch_scene(self._start_scene)
+        elif action.name == "SHOW_INSTRUCTIONS":
+            self.switch_scene(self._instructions_scene)
+        elif action.name == "SHOW_CREDITS":
+            self.switch_scene(self._credits_scene)

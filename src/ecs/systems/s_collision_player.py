@@ -10,6 +10,8 @@ from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_score_display import CScoreDisplay
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.ecs.components.c_velocity import CVelocity
+from src.ecs.systems.s_mine_explosion import explode_mine
 
 
 def system_collision_player(world:esper.World, player_entity:int, explosion_cfg:dict,
@@ -38,24 +40,25 @@ def system_collision_player(world:esper.World, player_entity:int, explosion_cfg:
             obj_rect = CSurface.get_area_relative(c_s.area, c_t.pos)
 
         if pl_rect.colliderect(obj_rect):
-            create_explosion(world, pygame.Vector2(obj_rect.center), explosion_cfg)
             _add_score(world, c_lo.score)
-            world.delete_entity(entity)
+            if c_lo.object_type == "mine":
+                explode_mine(world, entity, explosion_cfg)
+            else:
+                create_explosion(world, pygame.Vector2(obj_rect.center), explosion_cfg,
+                                 world.component_for_entity(entity, CVelocity).vel)
+                world.delete_entity(entity)
             on_player_hit()
             return
 
 
 def _hits_base(pl_rect:pygame.Rect, base_pos:pygame.Vector2, combat:CEnemyBaseCombat) -> bool:
-    """Misma geometria que usa la colision de balas: 6 nodos de 16x16 y el ojo central"""
-    eye_rect = pygame.Rect(round(base_pos.x + 39), round(base_pos.y + 30), 20, 20)
-    if pl_rect.colliderect(eye_rect):
+    """Misma geometria que usa la colision de balas: 6 nodos y el ojo central"""
+    if pl_rect.colliderect(combat.get_eye_rect(base_pos)):
         return True
-    for index, center in enumerate(combat.node_centers):
+    for index in range(len(combat.node_centers)):
         if combat.node_destroyed[index]:
             continue
-        node_rect = pygame.Rect(round(base_pos.x + center.x - 8),
-                                round(base_pos.y + center.y - 8), 16, 16)
-        if pl_rect.colliderect(node_rect):
+        if pl_rect.colliderect(combat.get_node_rect(base_pos, index)):
             return True
     return False
 

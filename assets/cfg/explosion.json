@@ -9,5 +9,19 @@
         {"x": 0, "y": 133, "w": 16, "h": 16}
     ],
     "frame_duration": 0.08,
-    "sound": "assets/snd/explosion.ogg"
+    "sound": "assets/snd/explosion.ogg",
+    "mine": {
+        "image": "assets/img/naves.png",
+        "frames": [
+            {"x": 183, "y": 133, "w": 16, "h": 16},
+            {"x": 167, "y": 133, "w": 16, "h": 16},
+            {"x": 151, "y": 133, "w": 16, "h": 16},
+            {"x": 135, "y": 133, "w": 16, "h": 16},
+            {"x": 119, "y": 133, "w": 16, "h": 16},
+            {"x": 103, "y": 133, "w": 16, "h": 16}
+        ],
+        "frame_duration": 0.08,
+        "sound": "assets/snd/mine_explosion.mp3",
+        "lethal_radius": 24
+    }
 }

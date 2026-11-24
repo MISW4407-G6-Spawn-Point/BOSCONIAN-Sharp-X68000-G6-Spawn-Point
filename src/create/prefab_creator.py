@@ -1,3 +1,4 @@
+import os
 import random
 
 import esper
@@ -43,6 +44,11 @@ from src.ecs.components.c_spy import CSpy
 from src.ecs.components.c_timed_spawner import CTimedSpawner
 from src.ecs.components.tags.c_tag_alert_overlay import CTagAlertOverlay
 from src.ecs.components.tags.c_tag_special_display import CTagSpecialDisplay
+from src.ecs.components.c_player_weapon import CPlayerWeapon
+from src.ecs.components.c_lifetime import CLifetime
+from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
+from src.ecs.components.c_base_core import CBaseCore
+from src.ecs.components.tags.c_tag_indestructible import CTagIndestructible
 
 _LEVEL_SPRITE_AREAS = {
     "enemy_base": {"x": 120, "y": 55, "w": 79, "h": 66},
@@ -185,13 +191,7 @@ def _create_enemy_base_object(
         eye_frame.set_colorkey((255, 0, 255))
         eye_frames.append(eye_frame)
 
-    entity = create_sprite(
-        world,
-        pygame.Vector2(enemy_base_cfg["position"]["x"],
-                       enemy_base_cfg["position"]["y"]) - pygame.Vector2(49, 40),
-        pygame.Vector2(0, 0),
-        base_surface,
-    )
+    entity = create_sprite(world, pygame.Vector2(0, 0), pygame.Vector2(0, 0), base_surface)
     world.add_component(entity, CTagWorld())
     world.add_component(entity, CLevelObject(
         "enemy_base",
@@ -211,11 +211,20 @@ def _create_enemy_base_object(
         (left_connector, right_connector),
         eye_frames,
         node_frames,
+        orientation=enemy_base_cfg.get("orientation", "horizontal"),
     )
+    eye = CEnemyBaseEye(None, eye_frames)
+    combat.eye_frame_index = eye.open_frame
     animated_surface = combat.compose()
-    world.component_for_entity(entity, CSurface).surf = animated_surface
-    world.add_component(entity, CEnemyBaseEye(animated_surface, eye_frames))
+    eye.base_surface = animated_surface
+    c_s = world.component_for_entity(entity, CSurface)
+    c_s.surf = animated_surface
+    c_s.area = animated_surface.get_rect()
+    core = pygame.Vector2(enemy_base_cfg["position"]["x"], enemy_base_cfg["position"]["y"])
+    world.component_for_entity(entity, CTransform).pos = core - combat.get_core_offset()
+    world.add_component(entity, eye)
     world.add_component(entity, combat)
+    world.add_component(entity, CBaseCore(enemy_base_cfg.get("core_mode", "cycle")))
     return entity
 
 
@@ -233,13 +242,11 @@ def create_level_objects(world:esper.World, level_cfg:dict, obstacles_cfg:dict =
     for enemy_base_cfg in enemy_base_configs:
         enemy_base_cfg = dict(enemy_base_cfg)
         enemy_base_cfg.setdefault("sprite_area", _LEVEL_SPRITE_AREAS["enemy_base"])
-        created_entities.append(_create_enemy_base_object(world, enemy_base_cfg))
-        occupied_rectangles.append(pygame.Rect(
-            enemy_base_cfg["position"]["x"] - 49,
-            enemy_base_cfg["position"]["y"] - 40,
-            99,
-            80,
-        ))
+        base_entity = _create_enemy_base_object(world, enemy_base_cfg)
+        created_entities.append(base_entity)
+        base_pos = world.component_for_entity(base_entity, CTransform).pos
+        base_size = world.component_for_entity(base_entity, CEnemyBaseCombat).get_size()
+        occupied_rectangles.append(pygame.Rect(base_pos, base_size))
 
     if obstacles_cfg is not None:
         counts = level_cfg.get("obstacles", obstacles_cfg["default_counts"])
@@ -286,7 +293,7 @@ def create_random_obstacles(world:esper.World, obstacles_cfg:dict, counts:dict,
     gap = obstacles_cfg["min_gap"]
     for obstacle_type, count in counts.items():
         type_cfg = obstacles_cfg["types"][obstacle_type]
-        area = type_cfg.get("sprite_area", _LEVEL_SPRITE_AREAS[obstacle_type])
+        area = type_cfg.get("sprite_area") or _LEVEL_SPRITE_AREAS[obstacle_type]
         for _ in range(count):
             for _attempt in range(50):
                 pos = pygame.Vector2(random.uniform(0, world_size["w"] - area["w"]),
@@ -301,13 +308,29 @@ def create_random_obstacles(world:esper.World, obstacles_cfg:dict, counts:dict,
                 object_cfg = {"image": obstacles_cfg["image"], "sprite_area": area,
                               "score": type_cfg["score"],
                               "position": {"x": pos.x, "y": pos.y}}
-                if obstacle_type == "mine":
+                if obstacle_type == "indestructible":
+                    created_entities.append(create_indestructible_rock(
+                        world, pos, obstacles_cfg["image"], type_cfg))
+                elif obstacle_type == "mine":
                     created_entities.append(_create_mine_object(world, object_cfg))
                 else:
                     created_entities.append(_create_level_object(
                         world, object_cfg, obstacle_type, type_cfg["score"]))
                 break
     return created_entities
+
+
+def create_indestructible_rock(world:esper.World, pos:pygame.Vector2, image_path:str,
+                               rock_cfg:dict) -> int:
+    """Roca teñida que avanza en linea recta en una direccion al azar"""
+    surface = _create_level_surface(image_path, rock_cfg["sprite_area"])
+    surface.fill(_color(rock_cfg["tint"]), special_flags=pygame.BLEND_RGB_MULT)
+    direction = pygame.Vector2(1, 0).rotate(random.uniform(0, 360))
+    rock_entity = create_sprite(world, pos, direction * rock_cfg["speed"], surface)
+    world.add_component(rock_entity, CTagWorld())
+    world.add_component(rock_entity, CTagIndestructible())
+    world.add_component(rock_entity, CHitBox(rock_cfg["hitbox"]))
+    return rock_entity
 
 
 def random_base_positions(count:int, world_size:dict, safe_center:dict, safe_radius:float,
@@ -359,14 +382,17 @@ def create_text(world:esper.World, text:str, font_path:str, size:int, color:dict
     return text_entity
 
 
-def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: dict) -> int:
+def create_explosion(world: esper.World,center: pygame.Vector2,explosion_cfg: dict,
+                     velocity: pygame.Vector2 = None) -> int:
+    """Explosion animada; si se pasa velocity, sigue desplazandose (la del enemigo muerto)"""
     frames = []
     for frame_area in explosion_cfg["frames"]:
         frames.append(_create_level_surface(explosion_cfg["image"], frame_area))
 
     first_frame = frames[0]
     position = center - pygame.Vector2(first_frame.get_size()) / 2
-    entity = create_sprite(world, position, pygame.Vector2(0, 0), first_frame)
+    vel = pygame.Vector2(velocity) if velocity is not None else pygame.Vector2(0, 0)
+    entity = create_sprite(world, position, vel, first_frame)
     world.add_component(entity, CExplosion(frames, explosion_cfg["frame_duration"]))
     world.add_component(entity, CTagWorld())
     if explosion_cfg.get("sound"):
@@ -575,9 +601,17 @@ def create_scene_timer(world:esper.World, scene_cfg:dict) -> int:
 
 
 def create_input_title(world:esper.World):
-    input_start = world.create_entity()
-    world.add_component(input_start,
-                        CInputCommand("START_GAME", pygame.K_RETURN))
+    """Menus: Enter/Z empieza, I instrucciones, C creditos, ESC vuelve al titulo"""
+    commands = [
+        ("START_GAME", pygame.K_RETURN),
+        ("START_GAME", pygame.K_z),
+        ("SHOW_INSTRUCTIONS", pygame.K_i),
+        ("SHOW_CREDITS", pygame.K_c),
+        ("BACK_TO_TITLE", pygame.K_ESCAPE),
+    ]
+    for name, key in commands:
+        input_entity = world.create_entity()
+        world.add_component(input_entity, CInputCommand(name, key))
 
 
 def create_input_play(world:esper.World):
@@ -644,16 +678,31 @@ def _bullet_surface(sheet:pygame.Surface, areas:dict, dir_index:int) -> pygame.S
     return pygame.transform.flip(cut("diagonal"), True, False)  # diagonal invertida
 
 
-def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict) -> None:
-    """Disparo"""
+def player_shot_angles(world:esper.World, player_entity:int, bullet_cfg:dict) -> list:
+    """Angulos (grados, 0 arriba, sentido horario) de las balas de un disparo.
+    Normal: 1 al frente y 1 atras. Con special_shot: 3 al frente en abanico y 1 atras."""
+    p_ship = world.component_for_entity(player_entity, CPlayerShip)
+    front = 45 * p_ship.dir_index
+    back = front + 180
+    weapon = world.try_component(player_entity, CPlayerWeapon)
+    if weapon is not None and weapon.special_shot:
+        spread = bullet_cfg["special_spread"]
+        return [front, front + spread, front - spread, back]
+    return [front, back]
+
+
+def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict,
+                          angles:list) -> int:
+    """Disparo: una bala por angulo. Devuelve cuantas balas creo."""
     p_t = world.component_for_entity(player_entity, CTransform)
     p_s = world.component_for_entity(player_entity, CSurface)
-    p_ship = world.component_for_entity(player_entity, CPlayerShip)
     center = p_t.pos + pygame.Vector2(p_s.area.size) / 2
     sheet = ServiceLocator.images_service.get(bullet_cfg["image"])
 
-    for dir_index in (p_ship.dir_index, (p_ship.dir_index + 4) % 8):
-        direction = pygame.Vector2(0, -1).rotate(45 * dir_index)
+    for angle in angles:
+        direction = pygame.Vector2(0, -1).rotate(angle)
+        # sprite de la direccion (de las 8) mas cercana al angulo
+        dir_index = round(angle / 45) % 8
         surface = _bullet_surface(sheet, bullet_cfg["areas"], dir_index)
         pos = center - pygame.Vector2(surface.get_size()) / 2
         bullet_entity = create_sprite(world, pos, direction * bullet_cfg["velocity"], surface)
@@ -662,6 +711,25 @@ def create_player_bullets(world:esper.World, player_entity:int, bullet_cfg:dict)
 
     if bullet_cfg.get("sound"):
         ServiceLocator.sounds_service.play(bullet_cfg["sound"])
+    return len(angles)
+
+
+def create_enemy_bullet(world:esper.World, center:pygame.Vector2, direction:pygame.Vector2,
+                        enemy_bullet_cfg:dict) -> int:
+    """Bala de torreta: cuadrado de color que sale de center hacia direction"""
+    size = enemy_bullet_cfg["size"]
+    surface = pygame.Surface((size, size))
+    surface.fill(_color(enemy_bullet_cfg["color"]))
+    pos = center - pygame.Vector2(size, size) / 2
+    bullet_entity = create_sprite(world, pos, direction * enemy_bullet_cfg["speed"], surface)
+    world.add_component(bullet_entity, CTagEnemyBullet())
+    world.add_component(bullet_entity, CTagWorld())
+    world.add_component(bullet_entity, CLifetime(enemy_bullet_cfg["lifetime"]))
+    # el sonido es opcional: si es null o el archivo no existe, no suena
+    sound = enemy_bullet_cfg.get("sound")
+    if sound and os.path.exists(sound):
+        ServiceLocator.sounds_service.play(sound)
+    return bullet_entity
 
 def create_radar_dot(world:esper.World, target:int, size:dict, color:dict) -> int:
     """Punto del minimapa"""
@@ -681,6 +749,18 @@ def create_pause_text(world:esper.World, pause_cfg:dict, font_path:str) -> int:
         c_s = world.component_for_entity(text_entity, CSurface)
         world.add_component(text_entity, CBlink(c_s.surf, pause_cfg["blink_time"]))
     world.add_component(text_entity, CTagPause())
+    return text_entity
+
+
+def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:
+    """Aviso de arma especial al iniciar el nivel: titila y se borra a los 'duration' segundos"""
+    text_entity = create_text(world, msg_cfg["text"], font_path, msg_cfg["size"],
+                              msg_cfg["color"], msg_cfg["position"], layer=3)
+    if msg_cfg["blink_time"] > 0:
+        c_s = world.component_for_entity(text_entity, CSurface)
+        world.add_component(text_entity, CBlink(c_s.surf, msg_cfg["blink_time"]))
+    world.add_component(text_entity, CLifetime(msg_cfg["duration"]))
+    world.add_component(text_entity, CTagHideOnPause())
     return text_entity
 
 

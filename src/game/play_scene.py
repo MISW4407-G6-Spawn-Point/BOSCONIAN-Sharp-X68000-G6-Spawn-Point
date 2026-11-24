@@ -7,8 +7,10 @@ from src.create.prefab_creator import (create_camera, create_enemy_spawner, crea
                                        create_pause_text, create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield,
-                                       create_timed_spawner, random_base_positions,
-                                       create_special_hud)
+                                       create_timed_spawner,
+                                       create_special_hud, create_special_shot_message,
+                                       player_shot_angles)
+from src.ecs.components.c_base_turrets import CBaseTurrets
 from src.ecs.components.c_camera import CCamera
 from src.ecs.components.c_condition_display import CConditionDisplay
 from src.ecs.components.c_enemy_base_combat import CEnemyBaseCombat
@@ -16,12 +18,20 @@ from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_level_object import CLevelObject
 from src.ecs.components.c_player_ship import CPlayerShip
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
+from src.ecs.components.c_player_weapon import CPlayerWeapon
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_pause import CTagPause
+from src.ecs.systems.s_base_core import system_base_core
+from src.ecs.systems.s_base_turrets import system_base_turrets
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_bullet_screen import system_bullet_screen
 from src.ecs.systems.s_camera import system_camera
 from src.ecs.systems.s_collision_bullet_level_object import system_collision_bullet_level_object
+from src.ecs.systems.s_collision_enemy_bullet import system_collision_enemy_bullet
+from src.ecs.systems.s_collision_enemy_bounce import system_collision_enemy_bounce
+from src.ecs.systems.s_collision_enemy_obstacle import system_collision_enemy_obstacle
+from src.ecs.systems.s_collision_indestructible import system_collision_indestructible
+from src.ecs.systems.s_mine_explosion import system_mine_explosion
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
@@ -29,6 +39,7 @@ from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_enemy_state import system_enemy_state
 from src.ecs.systems.s_explosion import system_explosion
 from src.ecs.systems.s_hi_score import system_hi_score
+from src.ecs.systems.s_lifetime import system_lifetime
 from src.ecs.systems.s_lives_hud import system_lives_hud
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_player_ship import system_player_ship
@@ -77,6 +88,7 @@ class PlayScene(Scene):
         self._game_cfg = ServiceLocator.configs_service.get("assets/cfg/game.json")
         self._enemies_cfg = ServiceLocator.configs_service.get("assets/cfg/enemies.json")
         self._bullet_cfg = ServiceLocator.configs_service.get("assets/cfg/bullet.json")
+        self._enemy_bullet_cfg = self._bullet_cfg["enemy"]
         self._explosion_cfg = ServiceLocator.configs_service.get(
             "assets/cfg/explosion.json"
         )
@@ -99,11 +111,13 @@ class PlayScene(Scene):
                                                 self._player_start)
         self.ecs_world.add_component(self._player_entity,
                                     CSpecialPower(self._special_cfg["uses_per_level"]))
+        # habilidad especial del nivel: disparo de 4 balas (3 al frente y 1 atras)
+        special_shot = self._level_cfg.get("special_shot", False)
+        self.ecs_world.add_component(self._player_entity, CPlayerWeapon(special_shot))
         obstacles_cfg = ServiceLocator.configs_service.get("assets/cfg/obstacles.json")
         self._difficulty_cfg = ServiceLocator.configs_service.get("assets/cfg/difficulty.json")
         level_with_obstacles = dict(self._level_cfg)
         level_with_obstacles.setdefault("obstacles", self._scaled_obstacles(obstacles_cfg))
-        level_with_obstacles["enemy_bases"] = self._random_bases()
         level_entities = create_level_objects(self.ecs_world, level_with_obstacles, obstacles_cfg,self._world_size, self._player_start)
         self._p_ship = self.ecs_world.component_for_entity(self._player_entity, CPlayerShip)
         self._p_state = self.ecs_world.component_for_entity(self._player_entity, CPlayerState)
@@ -127,6 +141,11 @@ class PlayScene(Scene):
         for entity in level_entities:
             level_object = self.ecs_world.try_component(entity, CLevelObject)
             if level_object is not None and level_object.object_type == "enemy_base":
+                # una torreta por nodo de la base
+                combat = self.ecs_world.component_for_entity(entity, CEnemyBaseCombat)
+                self.ecs_world.add_component(entity, CBaseTurrets(
+                    len(combat.node_centers), self._enemy_bullet_cfg["interval_min"],
+                    self._enemy_bullet_cfg["interval_max"]))
                 create_radar_dot(
                     self.ecs_world,
                     entity,
@@ -141,6 +160,9 @@ class PlayScene(Scene):
                              self._scaled(self._difficulty_cfg["formation_interval"]))
         create_timed_spawner(self.ecs_world, "spy", self._spy_cfg["interval"],
                              self._scaled(self._difficulty_cfg["spy_chance"]))
+        if special_shot:
+            create_special_shot_message(self.ecs_world, interface_cfg["special_shot_message"],
+                                        interface_cfg["font"])
         create_input_play(self.ecs_world)
         system_camera(self.ecs_world)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
@@ -158,17 +180,6 @@ class PlayScene(Scene):
         spawn_cfg["max_enemies"] = round(self._scaled(rules["max_enemies"]))
         spawn_cfg["accuracy"] = self._scaled(rules["accuracy"])
         return spawn_cfg
-
-    def _random_bases(self) -> list:
-        """Cada ronda hay mas bases, en posiciones al azar. Se usa la primera base del
-        nivel como plantilla (imagen y puntajes)."""
-        template = self._level_cfg["enemy_bases"]
-        template = template[0] if isinstance(template, list) else template
-        rules = self._difficulty_cfg["bases"]
-        positions = random_base_positions(round(self._scaled(rules["count"])), self._world_size,
-                                          self._player_start, rules["safe_radius"],
-                                          rules["min_distance"])
-        return [dict(template, position=position) for position in positions]
 
     def _scaled_obstacles(self, obstacles_cfg:dict) -> dict:
         """Cada ronda hay mas rocas y minas (default_counts * multiplicador)."""
@@ -193,6 +204,8 @@ class PlayScene(Scene):
             return  # en pausa solo titilan las estrellas
         system_condition(self.ecs_world, delta_time)
         system_enemy_base_eye(self.ecs_world, delta_time)
+        system_base_core(self.ecs_world, self._player_entity, self._world_size,
+                         self._enemies_cfg, self._player_cfg["max_speed"])
         system_sprite_animation(self.ecs_world, delta_time)
         system_player_ship(self.ecs_world, delta_time)
         system_enemy_spawner(self.ecs_world, self._player_entity, self._enemies_cfg,
@@ -207,7 +220,12 @@ class PlayScene(Scene):
                          self._enemies_cfg["despawn_distance"], delta_time)
         system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size,
                    self._spy_cfg["escape_sound"])
+        system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
+                            self._enemy_bullet_cfg, delta_time)
         system_movement(self.ecs_world, delta_time)
+        system_collision_indestructible(self.ecs_world, self._player_entity, self._world_size,
+                                        self._explosion_cfg, self._god_mode,
+                                        self._on_player_hit)
         system_collision_bullet_level_object(
             self.ecs_world,
             self._explosion_cfg,
@@ -215,10 +233,17 @@ class PlayScene(Scene):
         if not self._god_mode:
             system_collision_player(self.ecs_world, self._player_entity,
                                     self._explosion_cfg, self._on_player_hit)
+        system_collision_enemy_bullet(self.ecs_world, self._player_entity, self._explosion_cfg,
+                                      self._god_mode, self._on_player_hit)
+        system_collision_enemy_obstacle(self.ecs_world, self._world_size, self._explosion_cfg)
+        system_collision_enemy_bounce(self.ecs_world, self._world_size)
+        system_mine_explosion(self.ecs_world, self._player_entity, self._world_size,
+                              self._explosion_cfg, self._god_mode, self._on_player_hit)
         system_player_state(self.ecs_world, self._player_entity, delta_time,
                             self._on_player_respawn)
         system_explosion(self.ecs_world, delta_time)
         system_score_popup(self.ecs_world, delta_time)
+        system_lifetime(self.ecs_world, delta_time)
         system_alert_overlay(self.ecs_world, self._alerts_cfg, self._font)
         self._update_score()
         system_special_hud(self.ecs_world, self._player_entity)
@@ -296,8 +321,11 @@ class PlayScene(Scene):
 
         if action.name == "PLAYER_FIRE" and self._p_state.state == PlayerState.ALIVE:
             num_bullets = len(self.ecs_world.get_component(CTagBullet))
-            if num_bullets + 2 <= self._bullet_cfg["max_bullets"]:
-                create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg)
+            # 2 balas normal, 4 con el disparo especial del nivel
+            angles = player_shot_angles(self.ecs_world, self._player_entity, self._bullet_cfg)
+            if num_bullets + len(angles) <= self._bullet_cfg["max_bullets"]:
+                create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg,
+                                      angles)
 
         elif action.name == "PLAYER_SPECIAL" and self._p_state.state == PlayerState.ALIVE:
             system_special_power(self.ecs_world, self._player_entity, self._camera,
