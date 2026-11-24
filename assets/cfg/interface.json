@@ -102,7 +102,8 @@
                 "ESC     TITLE",
                 "F1      CHEAT: NEXT ROUND",
                 "F2      CHEAT: INVINCIBLE",
-                "F3      CHEAT: RED ALERT"
+                "F3      CHEAT: RED ALERT",
+                "F4      LEVEL EDITOR"
             ],
             [
                 {"text": "SPEED BOOST", "color": {"r": 255, "g": 210, "b": 120}},
@@ -209,6 +210,52 @@
             "line_height": 14
         },
         "page_hint": {"text": "P: BACK", "size": 8, "color": {"r": 160, "g": 160, "b": 160}, "position": {"x": 120, "y": 8}}
+    },
+    "editor": {
+        "size": 8,
+        "line_height": 10,
+        "camera_speed": 220,
+        "marker_blink": 0.3,
+        "title": {"text": "EDITOR", "color": {"r": 255, "g": 0, "b": 255}, "position": {"x": 236, "y": 4}, "align": "right"},
+        "options_x": 4,
+        "options_y": 16,
+        "option_color": {"r": 255, "g": 210, "b": 120},
+        "options": [
+            ["special_shot", "1 SPECIAL SHOT: {}"],
+            ["difficulty", "2 DIFFICULTY: {}"],
+            ["music", "3 MUSIC: {}"],
+            ["boost_item_chance", "4 BOOST CHANCE: {}"]
+        ],
+        "option_keys": {
+            "EDITOR_OPTION_1": "special_shot",
+            "EDITOR_OPTION_2": "difficulty",
+            "EDITOR_OPTION_3": "music",
+            "EDITOR_OPTION_4": "boost_item_chance"
+        },
+        "help_x": 4,
+        "help_y": 206,
+        "help_color": {"r": 200, "g": 200, "b": 200},
+        "help": [
+            "CLICK BASE  RIGHT-CLICK DEL",
+            "R ROTATE M CORE J START",
+            "S SAVE L LOAD D ORIGINAL",
+            "ARROWS CAMERA  F4 PLAY"
+        ],
+        "message": {"color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 120}, "align": "center", "time": 1.5},
+        "texts": {
+            "saved": "LEVEL SAVED",
+            "loaded": "LEVEL LOADED",
+            "nothing_saved": "NO SAVED LEVEL",
+            "reset": "ORIGINAL LEVEL",
+            "need_base": "PLACE AT LEAST ONE BASE"
+        },
+        "difficulties": {
+            "EASY": {"yellow": 12, "red": 120},
+            "NORMAL": {"yellow": 7, "red": 80},
+            "HARD": {"yellow": 3, "red": 45}
+        },
+        "boost_chances": [0.0, 0.25, 0.5, 0.75, 1.0],
+        "base_defaults": {"image": "assets/img/naves.png", "base_score": 1500, "node_score": 200, "orientation": "horizontal", "core_mode": "cycle"}
     },
     "god_mode": {"text": "INVINCIBLE", "size": 8, "color": {"r": 255, "g": 0, "b": 255}, "position": {"x": 4, "y": 4}, "align": "left"},
     "blast_off": {

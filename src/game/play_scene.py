@@ -41,6 +41,7 @@ from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_cutscene import system_cutscene
 from src.ecs.systems.s_scroll import system_scroll
 from src.ecs.systems.s_boss import system_boss
+from src.game.level_editor import LevelEditor, apply_level_override, original_level_data
 from src.ecs.components.tags.c_tag_god_mode import CTagGodMode
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
@@ -114,6 +115,13 @@ class PlayScene(Scene):
         self._play_area = interface_cfg["play_area"]
         self._world_size = world_cfg["world_size"]
         self._player_start = world_cfg["player_start"]
+        self._editor_cfg = interface_cfg["editor"]
+        self._original_level = original_level_data(self._level_cfg, self._player_start)
+        self._editor = None
+        override = None if self._session.is_boss_round() else self._session.level_override()
+        if override is not None:
+            self._level_cfg = apply_level_override(self._level_cfg, override, self._editor_cfg)
+            self._player_start = override["player_start"]
         self._radar_cfg = interface_cfg["hud"]["radar"]
         self._pause_cfg = interface_cfg["pause"]
         self._font = interface_cfg["font"]
@@ -166,16 +174,7 @@ class PlayScene(Scene):
         for entity in level_entities:
             level_object = self.ecs_world.try_component(entity, CLevelObject)
             if level_object is not None and level_object.object_type == "enemy_base":
-                combat = self.ecs_world.component_for_entity(entity, CEnemyBaseCombat)
-                self.ecs_world.add_component(entity, CBaseTurrets(
-                    len(combat.node_centers), self._enemy_bullet_cfg["interval_min"],
-                    self._enemy_bullet_cfg["interval_max"]))
-                create_radar_dot(
-                    self.ecs_world,
-                    entity,
-                    self._radar_cfg["dot_size"],
-                    self._radar_cfg["base_color"],
-                )
+                self._setup_base(entity)
         create_enemy_spawner(self.ecs_world, self._level_cfg.get(
             "enemy_spawn", self._scaled_enemy_spawn()))
         if self._level_cfg.get("formations", True):
@@ -200,15 +199,46 @@ class PlayScene(Scene):
         system_camera(self.ecs_world)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
 
+    def _setup_base(self, entity:int):
+        """Torretas y punto de radar de una base (tambien las que pone el editor)"""
+        combat = self.ecs_world.component_for_entity(entity, CEnemyBaseCombat)
+        self.ecs_world.add_component(entity, CBaseTurrets(
+            len(combat.node_centers), self._enemy_bullet_cfg["interval_min"],
+            self._enemy_bullet_cfg["interval_max"]))
+        create_radar_dot(self.ecs_world, entity, self._radar_cfg["dot_size"],
+                         self._radar_cfg["base_color"])
+
     def _play_level_music(self):
-        """Pista de la ronda actual (ciclo de music.json "levels")"""
-        tracks = self._music_cfg.get("levels")
+        """Pista de la ronda (ciclo de music.json "levels" o la elegida en el editor)"""
         if self._session.is_boss_round() and self._music_cfg.get("boss"):
             music = self._music_cfg["boss"]
             ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
-        elif tracks:
-            music = tracks[(self._session.level - 1) % len(tracks)]
-            ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
+        else:
+            self._preview_music(self._level_cfg.get("music", -1))
+
+    def _preview_music(self, index:int):
+        tracks = self._music_cfg.get("levels")
+        if not tracks:
+            return
+        if index < 0:
+            index = (self._session.level - 1) % len(tracks)
+        music = tracks[index % len(tracks)]
+        ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
+
+    def _toggle_editor(self):
+        """F4: abre el editor (mundo congelado pero visible); al cerrarlo reinicia la ronda"""
+        if self._editor is None:
+            if self._paused or self._session.is_boss_round():
+                return
+            current = self._session.level_override() or self._original_level
+            self._editor = LevelEditor(self, self._original_level, current)
+        elif self._editor.close():
+            self.switch_scene("PLAY_SCENE")
+
+    def do_process_events(self, event:pygame.event.Event):
+        if self._editor is not None and event.type == pygame.MOUSEBUTTONDOWN:
+            self._editor.on_click(event.pos, event.button)
+        super().do_process_events(event)
 
     def _on_condition_change(self, phase:str):
         """Suena una vez por cambio; en ROJA cambia la musica"""
@@ -253,6 +283,11 @@ class PlayScene(Scene):
             f"level{next_level}" in self._levels_cfg or next_level == boss_round
 
     def do_update(self, delta_time:float):
+        if self._editor is not None:
+            direction = sum((_DIRECTION_INPUTS[name] for name in self._held_directions),
+                            pygame.Vector2(0, 0))
+            self._editor.update(delta_time, direction)
+            return
         system_blink(self.ecs_world, delta_time)
         if self._paused:
             self._update_pause_page(delta_time)
@@ -433,6 +468,14 @@ class PlayScene(Scene):
     def do_action(self, action:CInputCommand):
         if action.name == "BACK_TO_TITLE" and action.phase == CommandPhase.STARTED:
             self.switch_scene(self._scenes_cfg["back_scene"])
+            return
+
+        if action.name == "EDITOR" and action.phase == CommandPhase.STARTED:
+            self._toggle_editor()
+            return
+        if self._editor is not None and action.name not in _DIRECTION_INPUTS:
+            if action.phase == CommandPhase.STARTED:
+                self._editor.on_action(action.name)
             return
 
         if action.name == "PAUSE" and action.phase == CommandPhase.STARTED:

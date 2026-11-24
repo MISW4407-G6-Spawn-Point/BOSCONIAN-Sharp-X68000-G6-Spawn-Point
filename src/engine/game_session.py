@@ -6,6 +6,7 @@ class GameSession:
 
     def __init__(self, game_cfg:dict) -> None:
         self._cfg = game_cfg
+        self.use_saved_levels = True
         self.hi_score = ServiceLocator.save_service.load_hi_score(game_cfg["hi_score"])
         self._saved_hi_score = self.hi_score
         self.new_game()
@@ -15,11 +16,20 @@ class GameSession:
         self.record_at_start = self.hi_score
         self.level = 1
         self.god_mode = False
+        self.edited_levels = {}
         self.score = 0
         self.lives = self._cfg["lives"]
         self.continues = 0
         self.lives_lost = 0
         self.next_extra_life = self._cfg["extra_life"]["first"]
+
+    def level_override(self):
+        """Ronda editada: lo de esta ejecucion o, si no, lo guardado (None si no hay)"""
+        if self.level in self.edited_levels:
+            return self.edited_levels[self.level]
+        if not self.use_saved_levels:
+            return None
+        return ServiceLocator.save_service.load_levels().get(str(self.level))
 
     def is_boss_round(self) -> bool:
         """La ronda del jefe es la que indica level.json -> "boss" -> "round" """

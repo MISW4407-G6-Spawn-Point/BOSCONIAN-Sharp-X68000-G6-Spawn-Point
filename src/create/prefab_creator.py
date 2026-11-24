@@ -238,6 +238,11 @@ def _create_enemy_base_object(
     return entity
 
 
+def create_enemy_base(world:esper.World, enemy_base_cfg:dict) -> int:
+    """Base enemiga igual que en el juego, con su nucleo en enemy_base_cfg["position"]"""
+    return _create_enemy_base_object(world, enemy_base_cfg)
+
+
 def create_boss(world:esper.World, boss_cfg:dict, core_pos:pygame.Vector2,
                 font_path:str) -> int:
     """MOTHER BASE: base escalada con nucleo cerrado, torretas en rafaga, radar y barra de vida"""
@@ -671,6 +676,17 @@ def create_input_play(world:esper.World):
         ("CHEAT_NEXT_LEVEL", pygame.K_F1),
         ("CHEAT_GOD_MODE", pygame.K_F2),
         ("CHEAT_RED_ALERT", pygame.K_F3),
+        ("EDITOR", pygame.K_F4),
+        ("EDITOR_ROTATE", pygame.K_r),
+        ("EDITOR_CORE", pygame.K_m),
+        ("EDITOR_START", pygame.K_j),
+        ("EDITOR_OPTION_1", pygame.K_1),
+        ("EDITOR_OPTION_2", pygame.K_2),
+        ("EDITOR_OPTION_3", pygame.K_3),
+        ("EDITOR_OPTION_4", pygame.K_4),
+        ("EDITOR_SAVE", pygame.K_s),
+        ("EDITOR_LOAD", pygame.K_l),
+        ("EDITOR_RESET", pygame.K_d),
     ]
     for name, key in commands:
         input_entity = world.create_entity()

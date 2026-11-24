@@ -42,5 +42,6 @@ python -m pygbag .       (navegador, http://localhost:8000)
 | I (título) | Instrucciones (HOW TO PLAY) |
 | C (título) | Créditos |
 | F1 / F2 / F3 | Trampas: siguiente nivel / invencible / alerta roja |
+| F4 | Editor de niveles: clic pone base, clic derecho la quita, R rota, M núcleo, J inicio del jugador, 1-4 opciones, S guarda, L carga, D vuelve al original, F4 juega |
 
 - **Habilidad especial por nivel:** en el nivel 1 la nave dispara 2 balas (adelante y atrás); desde el nivel 2 (`"special_shot": true` en `assets/cfg/level.json`) dispara 4: 3 al frente en abanico (separación `special_spread` de `bullet.json`) y 1 atrás. Al iniciar esos niveles aparece el aviso "SPECIAL WEAPON!".

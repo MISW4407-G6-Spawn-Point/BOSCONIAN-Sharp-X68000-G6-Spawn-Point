@@ -23,6 +23,7 @@ class DemoPlayScene(PlayScene):
         self._session = GameSession(configs.get("assets/cfg/game.json"))
         self._session.hi_score = real_session.hi_score
         self._session.save_record = lambda: None
+        self._session.use_saved_levels = False
 
         super().do_create()
         self._god_mode = True
