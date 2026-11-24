@@ -35,6 +35,12 @@
             {"start_time": 5.0, "type": "text", "text": "PRESS ANY KEY", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 200}, "blink_time": 0.4}
         ]
     },
+    "attract_scene": {
+        "texts": [
+            {"text": "DEMO PLAY", "size": 8, "color": {"r": 255, "g": 200, "b": 0}, "position": {"x": 120, "y": 40}, "blink_time": 0.5},
+            {"text": "PRESS ANY KEY", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 220}, "blink_time": 0.6}
+        ]
+    },
     "title_scene": {
         "logo": {
             "image": "assets/img/titulo.png",

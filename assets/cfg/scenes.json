@@ -9,19 +9,27 @@
     },
     "TITLE_SCENE": {
         "duration": 6.0,
-        "next_scene": "SCORE_TABLE_SCENE",
+        "next_scene": "ATTRACT_SCENE",
         "start_scene": "LEVEL_SCENE",
         "instructions_scene": "INSTRUCTIONS_SCENE",
         "credits_scene": "CREDITS_SCENE"
     },
     "SCORE_TABLE_SCENE": {
         "duration": 6.0,
-        "next_scene": "INSTRUCTIONS_SCENE",
+        "next_scene": "CREDITS_SCENE",
         "start_scene": "LEVEL_SCENE"
+    },
+    "ATTRACT_SCENE": {
+        "duration": 20.0,
+        "next_scene": "INSTRUCTIONS_SCENE",
+        "back_scene": "TITLE_SCENE",
+        "turn_interval": 0.4,
+        "fire_interval": 0.25,
+        "avoid_distance": 40
     },
     "INSTRUCTIONS_SCENE": {
         "duration": 14.0,
-        "next_scene": "CREDITS_SCENE",
+        "next_scene": "SCORE_TABLE_SCENE",
         "start_scene": "LEVEL_SCENE",
         "back_scene": "TITLE_SCENE"
     },

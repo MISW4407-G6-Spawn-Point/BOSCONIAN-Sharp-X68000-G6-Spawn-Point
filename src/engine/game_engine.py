@@ -8,6 +8,7 @@ from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
 from src.game.boot_scene import BootScene
 from src.game.intro_scene import IntroScene
+from src.game.demo_play_scene import DemoPlayScene
 from src.game.title_scene import TitleScene
 from src.game.level_scene import LevelScene
 from src.game.play_scene import PlayScene
@@ -44,6 +45,7 @@ class GameEngine:
         self._scenes["TITLE_SCENE"] = TitleScene(self)
         self._scenes["LEVEL_SCENE"] = LevelScene(self)
         self._scenes["PLAY_SCENE"] = PlayScene(self)
+        self._scenes["ATTRACT_SCENE"] = DemoPlayScene(self)
         self._scenes["GAME_OVER_SCENE"] = GameOverScene(self)
         self._scenes["VICTORY_SCENE"] = VictoryScene(self)
         self._scenes["SCORE_TABLE_SCENE"] = ScoreTableScene(self)

@@ -318,6 +318,15 @@ class PlayScene(Scene):
         return self._p_state.state == PlayerState.ALIVE and \
             not self.ecs_world.get_component(CCutscene)
 
+    def _fire(self):
+        """Z (o el piloto de la demo): 2 balas, o 4 con el disparo especial del nivel"""
+        if not self._can_act():
+            return
+        num_bullets = len(self.ecs_world.get_component(CTagBullet))
+        angles = player_shot_angles(self.ecs_world, self._player_entity, self._bullet_cfg)
+        if num_bullets + len(angles) <= self._bullet_cfg["max_bullets"]:
+            create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg, angles)
+
     def _on_player_hit(self):
         kill_player(self.ecs_world, self._player_entity,
                     self._player_cfg["death"], self._explosion_cfg)
@@ -406,12 +415,8 @@ class PlayScene(Scene):
         if self._paused or action.phase != CommandPhase.STARTED:
             return
 
-        if action.name == "PLAYER_FIRE" and self._can_act():
-            num_bullets = len(self.ecs_world.get_component(CTagBullet))
-            angles = player_shot_angles(self.ecs_world, self._player_entity, self._bullet_cfg)
-            if num_bullets + len(angles) <= self._bullet_cfg["max_bullets"]:
-                create_player_bullets(self.ecs_world, self._player_entity, self._bullet_cfg,
-                                      angles)
+        if action.name == "PLAYER_FIRE":
+            self._fire()
 
         elif action.name == "PLAYER_SPECIAL" and self._can_act():
             activate_boost(self.ecs_world, self._player_entity, self._special_cfg)
