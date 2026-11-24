@@ -14,6 +14,7 @@ class GameSession:
         self.save_record()
         self.record_at_start = self.hi_score
         self.level = 1
+        self.god_mode = False
         self.score = 0
         self.lives = self._cfg["lives"]
         self.continues = 0

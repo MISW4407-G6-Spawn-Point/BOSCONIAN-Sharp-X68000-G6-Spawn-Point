@@ -31,6 +31,8 @@ from src.ecs.components.c_cutscene import CCutscene
 from src.ecs.components.c_boost_item_spawner import CBoostItemSpawner
 from src.ecs.components.c_intro_timeline import CIntroTimeline
 from src.ecs.components.c_stop_at import CStopAt
+from src.ecs.components.c_scroll import CScroll
+from src.ecs.components.tags.c_tag_god_mode import CTagGodMode
 from src.ecs.components.tags.c_tag_boost_item import CTagBoostItem
 from src.ecs.components.tags.c_tag_pause import CTagPause
 from src.create.enemy_base_composer import enemy_base_composer
@@ -768,35 +770,109 @@ def create_pause_menu(world:esper.World, pause_cfg:dict, font_path:str) -> None:
         world.add_component(entity, CTagPause())
 
 
-def create_text_page(world:esper.World, page_cfg:dict, font_path:str, page_index:int,
-                     layer:int = 1) -> list:
-    """Lineas de una pagina de instrucciones/creditos y su marcador 1/2"""
-    page = page_cfg["pages"][page_index]
+def _enemy_base_icon(image_path:str) -> pygame.Surface:
+    """Base enemiga armada igual que en el juego, para usarla como icono"""
+    temp_world = esper.World()
+    base = _create_enemy_base_object(temp_world, {
+        "image": image_path, "base_score": 0, "node_score": 0,
+        "position": {"x": 0, "y": 0}, "orientation": "horizontal"})
+    return temp_world.component_for_entity(base, CSurface).surf
+
+
+def _scroll_icon(world:esper.World, icon:dict, center:pygame.Vector2, layer:int) -> int:
+    """Icono de una linea: recorte de naves.png, base enemiga, capsula del BOOST o caja de color"""
+    blink_surface = None
+    blink_time = 0
+    if icon.get("enemy_base"):
+        surface = _enemy_base_icon(icon["image"])
+    elif icon.get("capsule"):
+        item_cfg = ServiceLocator.configs_service.get("assets/cfg/special.json")["item"]
+        size = pygame.Vector2(item_cfg["size"], item_cfg["size"])
+        surface = CSurface(size, _color(item_cfg["colors"][0])).surf
+        blink_surface = CSurface(size, _color(item_cfg["colors"][-1])).surf
+        blink_time = item_cfg["blink_time"]
+    elif "box" in icon:
+        surface = CSurface(pygame.Vector2(icon["w"], icon["h"]), _color(icon["box"])).surf
+    else:
+        surface = _create_level_surface(icon["image"], icon["area"])
+    if "tint" in icon:
+        surface = surface.copy()
+        surface.fill(_color(icon["tint"]), special_flags=pygame.BLEND_RGB_MULT)
+    if icon.get("scale"):
+        surface = pygame.transform.scale_by(surface, icon["scale"])
+    entity = world.create_entity()
+    world.add_component(entity, CSurface.from_surface(surface))
+    world.add_component(entity, CTransform(center - pygame.Vector2(surface.get_size()) / 2))
+    world.add_component(entity, CTagUI(layer))
+    if blink_surface is not None:
+        blink = CBlink(surface, blink_time)
+        blink.off_surf = blink_surface
+        world.add_component(entity, blink)
+    return entity
+
+
+def create_scroll_text(world:esper.World, scroll_cfg:dict, font_path:str,
+                       layer:int = 1) -> list:
+    """Todas las lineas (con su icono) empezando en start_y; suben con CScroll"""
     entities = []
-    for i, line in enumerate(page["lines"]):
-        pos = {"x": page_cfg["line_x"], "y": page_cfg["line_y"] + i * page_cfg["line_height"]}
-        entities.append(create_text(world, line, font_path, page_cfg["size"],
-                                    page.get("color", page_cfg["color"]), pos,
-                                    page_cfg["align"], layer))
-    if len(page_cfg["pages"]) > 1:
-        marker = page_cfg["page_marker"]
-        text = marker["text"].format(page=page_index + 1, total=len(page_cfg["pages"]))
-        entities.append(create_text(world, text, font_path, page_cfg["size"], marker["color"],
-                                    marker["position"], layer=layer))
+    y = scroll_cfg["start_y"]
+    size = scroll_cfg["size"]
+    for item in scroll_cfg["items"]:
+        if isinstance(item, str):
+            item = {"text": item}
+        height = scroll_cfg["line_height"]
+        color = item.get("color", scroll_cfg["color"])
+        icon = item.get("icon")
+        if icon is not None:
+            icon_entity = _scroll_icon(world, icon, pygame.Vector2(scroll_cfg["icon_x"], 0), layer)
+            icon_h = world.component_for_entity(icon_entity, CSurface).area.height
+            height = max(height, icon_h + scroll_cfg["icon_gap"])
+            c_t = world.component_for_entity(icon_entity, CTransform)
+            c_t.pos.y = y + (height - icon_h) / 2
+            entities.append(icon_entity)
+        text_y = y + (height - size) / 2
+        if icon is not None or item.get("indent"):
+            pos, align = {"x": scroll_cfg["text_x"], "y": text_y}, "left"
+        else:
+            pos, align = {"x": scroll_cfg["line_x"], "y": text_y}, scroll_cfg["align"]
+        if item.get("text"):
+            entities.append(create_text(world, item["text"], font_path, size, color, pos,
+                                        align, layer))
+        y += height
+    for entity in entities:
+        world.add_component(entity, CScroll(scroll_cfg["scroll_speed"]))
     return entities
 
 
-def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path:str,
-                      page_index:int) -> None:
-    """Pagina de instrucciones o creditos dentro de la pausa"""
-    title = page_cfg["title"]
-    entities = [create_text(world, title["text"], font_path, title["size"], title["color"],
-                            title["position"], layer=3)]
-    entities += create_text_page(world, page_cfg, font_path, page_index, layer=3)
+def create_scroll_frame(world:esper.World, scroll_cfg:dict, font_path:str,
+                        layer:int) -> list:
+    """Franja negra superior (las lineas desaparecen debajo) con el titulo encima"""
+    play_area = ServiceLocator.configs_service.get("assets/cfg/interface.json")["play_area"]
+    cover = create_rect(world, {"x": play_area["x"], "y": play_area["y"]},
+                        {"w": play_area["w"], "h": scroll_cfg["clip_top"]},
+                        {"r": 0, "g": 0, "b": 0}, layer)
+    title = scroll_cfg["title"]
+    title_entity = create_text(world, title["text"], font_path, title["size"], title["color"],
+                               title["position"], layer=layer + 1)
+    return [cover, title_entity]
+
+
+def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path:str) -> None:
+    """Instrucciones o creditos con scroll dentro de la pausa"""
+    entities = create_scroll_text(world, page_cfg, font_path, layer=3)
+    entities += create_scroll_frame(world, page_cfg, font_path, layer=4)
     entities.append(create_text(world, hint_cfg["text"], font_path, hint_cfg["size"],
-                                hint_cfg["color"], hint_cfg["position"], layer=3))
+                                hint_cfg["color"], hint_cfg["position"], layer=5))
     for entity in entities:
         world.add_component(entity, CTagPause())
+
+
+def create_god_mode_text(world:esper.World, god_cfg:dict, font_path:str) -> int:
+    """Aviso INVINCIBLE en una esquina del area de juego (tambien se ve en pausa)"""
+    entity = create_text(world, god_cfg["text"], font_path, god_cfg["size"], god_cfg["color"],
+                         god_cfg["position"], god_cfg.get("align", "left"), layer=6)
+    world.add_component(entity, CTagGodMode())
+    return entity
 
 
 def create_blast_off(world:esper.World, blast_cfg:dict, font_path:str,

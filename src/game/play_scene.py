@@ -4,7 +4,8 @@ import pygame
 
 from src.create.prefab_creator import (create_blast_off, create_camera, create_enemy_spawner,
                                        create_hud, create_input_play, create_level_objects,
-                                       create_pause_menu, create_pause_page,
+                                       create_god_mode_text, create_pause_menu,
+                                       create_pause_page,
                                        create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield,
@@ -38,6 +39,8 @@ from src.ecs.systems.s_mine_explosion import system_mine_explosion
 from src.ecs.systems.s_collision_player import system_collision_player
 from src.ecs.systems.s_condition import system_condition
 from src.ecs.systems.s_cutscene import system_cutscene
+from src.ecs.systems.s_scroll import system_scroll
+from src.ecs.components.tags.c_tag_god_mode import CTagGodMode
 from src.ecs.systems.s_enemy_base_eye import system_enemy_base_eye
 from src.ecs.systems.s_enemy_spawner import system_enemy_spawner
 from src.ecs.systems.s_enemy_state import system_enemy_state
@@ -117,6 +120,8 @@ class PlayScene(Scene):
         self._paused = False
         self._pause_view = None
         self._held_directions = set()
+        self._god_mode = self._session.god_mode
+        self._show_god_mode()
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
         self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
@@ -319,6 +324,13 @@ class PlayScene(Scene):
         return self._p_state.state == PlayerState.ALIVE and \
             not self.ecs_world.get_component(CCutscene)
 
+    def _show_god_mode(self):
+        """Muestra u oculta el aviso INVINCIBLE segun el modo actual"""
+        for entity, _ in self.ecs_world.get_component(CTagGodMode):
+            self.ecs_world.delete_entity(entity)
+        if self._god_mode:
+            create_god_mode_text(self.ecs_world, self._interface_cfg["god_mode"], self._font)
+
     def _fire(self):
         """Z (o el piloto de la demo): 2 balas, o 4 con el disparo especial del nivel"""
         if not self._can_act():
@@ -351,28 +363,23 @@ class PlayScene(Scene):
         for entity, _ in self.ecs_world.get_component(CTagPause):
             self.ecs_world.delete_entity(entity)
 
-    def _show_pause_view(self, view:str, page_index:int = 0):
+    def _show_pause_view(self, view:str):
         """view: "menu" o el nombre de la config de paginas (instructions_scene, credits_scene)"""
         self._clear_pause_texts()
         self._pause_view = view
         if view == "menu":
             create_pause_menu(self.ecs_world, self._pause_cfg, self._font)
             return
-        page_cfg = self._interface_cfg[view]
-        self._page_index = page_index
-        self._page_time = page_cfg["page_time"]
-        create_pause_page(self.ecs_world, page_cfg, self._pause_cfg["page_hint"], self._font,
-                          page_index)
+        create_pause_page(self.ecs_world, self._interface_cfg[view],
+                          self._pause_cfg["page_hint"], self._font)
 
     def _update_pause_page(self, delta_time:float):
-        """Las paginas con mas de una hoja rotan solas, como en su escena"""
+        """En la pausa el scroll vuelve a empezar al terminar"""
         if self._pause_view in (None, "menu"):
             return
-        page_cfg = self._interface_cfg[self._pause_view]
-        self._page_time -= delta_time
-        if self._page_time <= 0 and len(page_cfg["pages"]) > 1:
-            self._show_pause_view(self._pause_view,
-                                  (self._page_index + 1) % len(page_cfg["pages"]))
+        if system_scroll(self.ecs_world, delta_time,
+                         self._interface_cfg[self._pause_view]["clip_top"]):
+            self._show_pause_view(self._pause_view)
 
     def _toggle_pause(self):
         if self._paused and self._pause_view != "menu":
@@ -426,6 +433,8 @@ class PlayScene(Scene):
             self._next_level()
         elif action.name == "CHEAT_GOD_MODE":
             self._god_mode = not self._god_mode
+            self._session.god_mode = self._god_mode
+            self._show_god_mode()
         elif action.name == "CHEAT_RED_ALERT":
             for _, condition in self.ecs_world.get_component(CConditionDisplay):
                 condition.elapsed_time = max(condition.elapsed_time, condition.red_time)
