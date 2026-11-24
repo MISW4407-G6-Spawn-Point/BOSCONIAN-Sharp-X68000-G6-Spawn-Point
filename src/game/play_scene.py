@@ -84,6 +84,9 @@ _PAUSE_PAGES = {
 }
 
 
+_PAUSE_PAGE_STEPS = {"PLAYER_LEFT": -1, "PLAYER_RIGHT": 1}
+
+
 class PlayScene(Scene):
     def __init__(self, game_engine):
         super().__init__(game_engine)
@@ -363,19 +366,20 @@ class PlayScene(Scene):
         for entity, _ in self.ecs_world.get_component(CTagPause):
             self.ecs_world.delete_entity(entity)
 
-    def _show_pause_view(self, view:str):
+    def _show_pause_view(self, view:str, page_index:int = 0):
         """view: "menu" o el nombre de la config de paginas (instructions_scene, credits_scene)"""
         self._clear_pause_texts()
         self._pause_view = view
         if view == "menu":
             create_pause_menu(self.ecs_world, self._pause_cfg, self._font)
             return
+        self._pause_page_index = page_index
         create_pause_page(self.ecs_world, self._interface_cfg[view],
-                          self._pause_cfg["page_hint"], self._font)
+                          self._pause_cfg["page_hint"], self._font, page_index)
 
     def _update_pause_page(self, delta_time:float):
         """En la pausa el scroll vuelve a empezar al terminar"""
-        if self._pause_view in (None, "menu"):
+        if self._pause_view in (None, "menu") or "pages" in self._interface_cfg[self._pause_view]:
             return
         if system_scroll(self.ecs_world, delta_time,
                          self._interface_cfg[self._pause_view]["clip_top"]):
@@ -393,6 +397,14 @@ class PlayScene(Scene):
             ServiceLocator.sounds_service.unpause_music()
             self._clear_pause_texts()
             self._pause_view = None
+
+    def _flip_pause_page(self, step:int):
+        """Flechas en una pagina de la pausa: pagina anterior / siguiente"""
+        if not self._paused or self._pause_view in (None, "menu"):
+            return
+        pages = self._interface_cfg[self._pause_view].get("pages")
+        if pages and 0 <= self._pause_page_index + step < len(pages):
+            self._show_pause_view(self._pause_view, self._pause_page_index + step)
 
     def _toggle_pause_page(self, view:str):
         """I o C: abre la pagina; la misma tecla vuelve al menu"""
@@ -412,6 +424,8 @@ class PlayScene(Scene):
                 self._toggle_pause_page(_PAUSE_PAGES[action.name])
             return
 
+        if action.name in _PAUSE_PAGE_STEPS and action.phase == CommandPhase.STARTED:
+            self._flip_pause_page(_PAUSE_PAGE_STEPS[action.name])
         if action.name in _DIRECTION_INPUTS:
             if action.phase == CommandPhase.STARTED:
                 self._held_directions.add(action.name)

@@ -615,6 +615,8 @@ def create_input_title(world:esper.World):
         ("SHOW_INSTRUCTIONS", pygame.K_i),
         ("SHOW_CREDITS", pygame.K_c),
         ("BACK_TO_TITLE", pygame.K_ESCAPE),
+        ("PAGE_PREV", pygame.K_LEFT),
+        ("PAGE_NEXT", pygame.K_RIGHT),
     ]
     for name, key in commands:
         input_entity = world.create_entity()
@@ -811,36 +813,72 @@ def _scroll_icon(world:esper.World, icon:dict, center:pygame.Vector2, layer:int)
     return entity
 
 
-def create_scroll_text(world:esper.World, scroll_cfg:dict, font_path:str,
-                       layer:int = 1) -> list:
-    """Todas las lineas (con su icono) empezando en start_y; suben con CScroll"""
+def create_text_lines(world:esper.World, text_cfg:dict, items:list, start_y:float,
+                      font_path:str, layer:int = 1) -> list:
+    """Lineas de texto (con icono opcional al lado) desde start_y hacia abajo"""
     entities = []
-    y = scroll_cfg["start_y"]
-    size = scroll_cfg["size"]
-    for item in scroll_cfg["items"]:
+    y = start_y
+    size = text_cfg["size"]
+    for item in items:
         if isinstance(item, str):
             item = {"text": item}
-        height = scroll_cfg["line_height"]
-        color = item.get("color", scroll_cfg["color"])
+        height = text_cfg["line_height"]
+        color = item.get("color", text_cfg["color"])
         icon = item.get("icon")
         if icon is not None:
-            icon_entity = _scroll_icon(world, icon, pygame.Vector2(scroll_cfg["icon_x"], 0), layer)
+            icon_entity = _scroll_icon(world, icon, pygame.Vector2(text_cfg["icon_x"], 0), layer)
             icon_h = world.component_for_entity(icon_entity, CSurface).area.height
-            height = max(height, icon_h + scroll_cfg["icon_gap"])
+            height = max(height, icon_h + text_cfg["icon_gap"])
             c_t = world.component_for_entity(icon_entity, CTransform)
             c_t.pos.y = y + (height - icon_h) / 2
             entities.append(icon_entity)
         text_y = y + (height - size) / 2
         if icon is not None or item.get("indent"):
-            pos, align = {"x": scroll_cfg["text_x"], "y": text_y}, "left"
+            pos, align = {"x": text_cfg["text_x"], "y": text_y}, "left"
         else:
-            pos, align = {"x": scroll_cfg["line_x"], "y": text_y}, scroll_cfg["align"]
+            pos, align = {"x": text_cfg["line_x"], "y": text_y}, text_cfg["align"]
         if item.get("text"):
             entities.append(create_text(world, item["text"], font_path, size, color, pos,
                                         align, layer))
         y += height
+    return entities
+
+
+def create_scroll_text(world:esper.World, scroll_cfg:dict, font_path:str,
+                       layer:int = 1) -> list:
+    """Todas las lineas empezando en start_y; suben con CScroll"""
+    entities = create_text_lines(world, scroll_cfg, scroll_cfg["items"], scroll_cfg["start_y"],
+                                 font_path, layer)
     for entity in entities:
         world.add_component(entity, CScroll(scroll_cfg["scroll_speed"]))
+    return entities
+
+
+def create_text_page(world:esper.World, page_cfg:dict, font_path:str, page_index:int,
+                     layer:int = 1) -> list:
+    """Una pagina con su titulo y abajo las flechas < > y el numero de pagina"""
+    title = page_cfg["title"]
+    entities = [create_text(world, title["text"], font_path, title["size"], title["color"],
+                            title["position"], layer=layer)]
+    entities += create_text_lines(world, page_cfg, page_cfg["pages"][page_index],
+                                  page_cfg["line_y"], font_path, layer)
+    nav = page_cfg["nav"]
+    total = len(page_cfg["pages"])
+    marker = nav["marker"].format(page=page_index + 1, total=total)
+    entities.append(create_text(world, marker, font_path, page_cfg["size"], nav["color"],
+                                {"x": nav["marker_x"], "y": nav["y"]}, layer=layer))
+    arrows = []
+    if page_index > 0:
+        arrows.append((nav["prev"], nav["prev_x"]))
+    if page_index < total - 1:
+        arrows.append((nav["next"], nav["next_x"]))
+    for text, x in arrows:
+        arrow = create_text(world, text, font_path, page_cfg["size"], nav["arrow_color"],
+                            {"x": x, "y": nav["y"]}, layer=layer)
+        if nav.get("blink_time", 0) > 0:
+            c_s = world.component_for_entity(arrow, CSurface)
+            world.add_component(arrow, CBlink(c_s.surf, nav["blink_time"]))
+        entities.append(arrow)
     return entities
 
 
@@ -857,10 +895,14 @@ def create_scroll_frame(world:esper.World, scroll_cfg:dict, font_path:str,
     return [cover, title_entity]
 
 
-def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path:str) -> None:
-    """Instrucciones o creditos con scroll dentro de la pausa"""
-    entities = create_scroll_text(world, page_cfg, font_path, layer=3)
-    entities += create_scroll_frame(world, page_cfg, font_path, layer=4)
+def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path:str,
+                      page_index:int = 0) -> None:
+    """Instrucciones (por paginas) o creditos (scroll) dentro de la pausa"""
+    if "pages" in page_cfg:
+        entities = create_text_page(world, page_cfg, font_path, page_index, layer=3)
+    else:
+        entities = create_scroll_text(world, page_cfg, font_path, layer=3)
+        entities += create_scroll_frame(world, page_cfg, font_path, layer=4)
     entities.append(create_text(world, hint_cfg["text"], font_path, hint_cfg["size"],
                                 hint_cfg["color"], hint_cfg["position"], layer=5))
     for entity in entities:
