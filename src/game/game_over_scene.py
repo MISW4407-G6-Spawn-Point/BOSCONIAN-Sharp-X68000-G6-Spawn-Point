@@ -42,6 +42,7 @@ class GameOverScene(Scene):
                                         font, cd["size"], color, self._time, tracks_score=False)
         self.ecs_world.add_component(countdown_entity, self._countdown)
         create_input_continue(self.ecs_world)
+        ServiceLocator.sounds_service.play_cfg(interface_cfg["game_over_scene"].get("sound"))
 
     def do_update(self, delta_time:float):
         system_blink(self.ecs_world, delta_time)

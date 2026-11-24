@@ -139,6 +139,7 @@
         "duration": 3
     },
     "game_over_scene": {
+        "sound": {"path": "assets/snd/game_over.ogg", "volume": 0.9},
         "texts": [
             {"text": "GAME  OVER", "size": 8, "color": {"r": 255, "g": 255, "b": 255}, "position": {"x": 120, "y": 100}},
             {"text": "TO CONTINUE GAME", "size": 8, "color": {"r": 40, "g": 150, "b": 255}, "position": {"x": 120, "y": 124}},
@@ -158,7 +159,7 @@
                   "lines": ["SCORE {score}", "LIVES LOST {lives_lost}", "CONTINUES {continues}"]}
     },
     "hi_score_scene": {
-        "sound": "assets/snd/record_horn.mp3",
+        "sound": "assets/snd/record_horn.ogg",
         "texts": [
             {"text": "CONGRATULATIONS!", "size": 8, "color": {"r": 255, "g": 200, "b": 0}, "position": {"x": 120, "y": 72}, "blink_time": 0.4},
             {"text": "NEW HI-SCORE", "size": 8, "color": {"r": 60, "g": 120, "b": 255}, "position": {"x": 120, "y": 100}},
@@ -173,7 +174,11 @@
         "line_height": 13,
         "size": 8,
         "formation": {"lines": ["FORMATION", "ATTACK!"], "color": {"r": 255, "g": 90, "b": 90}},
-        "spy": {"lines": ["SPY SHIP", "SIGHTED"], "color": {"r": 255, "g": 90, "b": 90}}
+        "spy": {"lines": ["SPY SHIP", "SIGHTED"], "color": {"r": 255, "g": 90, "b": 90}},
+        "sounds": {
+            "YELLOW": {"path": "assets/snd/yellow_alert.ogg", "volume": 0.8},
+            "RED": {"path": "assets/snd/red_alert.ogg", "volume": 0.9}
+        }
     },
     "score_popup": {"size": 8, "color": {"r": 255, "g": 255, "b": 255}, "duration": 1.2},
     "score_table_scene": {

@@ -11,5 +11,5 @@
         {"max_distance": 140, "score": 800},
         {"score": 1600}
     ],
-    "escape_sound": "assets/snd/laser.ogg"
+    "appear_sound": {"path": "assets/snd/spy.ogg", "volume": 0.8}
 }

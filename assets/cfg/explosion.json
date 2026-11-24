@@ -10,6 +10,7 @@
     ],
     "frame_duration": 0.08,
     "sound": "assets/snd/explosion.ogg",
+    "base_destroyed_sound": {"path": "assets/snd/destroyed_base.ogg", "volume": 0.9},
     "mine": {
         "image": "assets/img/naves.png",
         "frames": [
@@ -21,7 +22,7 @@
             {"x": 103, "y": 133, "w": 16, "h": 16}
         ],
         "frame_duration": 0.08,
-        "sound": "assets/snd/mine_explosion.mp3",
+        "sound": "assets/snd/mine_explosion.ogg",
         "lethal_radius": 24
     }
 }

@@ -164,8 +164,25 @@ class PlayScene(Scene):
             create_special_shot_message(self.ecs_world, interface_cfg["special_shot_message"],
                                         interface_cfg["font"])
         create_input_play(self.ecs_world)
+        self._music_cfg = ServiceLocator.configs_service.get("assets/cfg/music.json")
+        self._play_level_music()
+        ServiceLocator.sounds_service.play_cfg(self._game_cfg.get("sound_level_start"))
         system_camera(self.ecs_world)
         system_radar(self.ecs_world, self._radar_cfg, self._world_size)
+
+    def _play_level_music(self):
+        """Pista de la ronda actual (ciclo de music.json "levels")"""
+        tracks = self._music_cfg.get("levels")
+        if tracks:
+            music = tracks[(self._session.level - 1) % len(tracks)]
+            ServiceLocator.sounds_service.play_music(music["track"], music["volume"])
+
+    def _on_condition_change(self, phase:str):
+        """Suena una vez por cambio; en ROJA cambia la musica"""
+        ServiceLocator.sounds_service.play_cfg(self._alerts_cfg.get("sounds", {}).get(phase))
+        red_music = self._music_cfg.get("red_alert")
+        if phase == "RED" and red_music:
+            ServiceLocator.sounds_service.play_music(red_music["track"], red_music["volume"])
 
     def _scaled(self, rule:dict) -> float:
         """start + per_round * (ronda - 1), sin pasar de limit (hacia arriba o hacia abajo)."""
@@ -202,7 +219,7 @@ class PlayScene(Scene):
         system_blink(self.ecs_world, delta_time)
         if self._paused:
             return  # en pausa solo titilan las estrellas
-        system_condition(self.ecs_world, delta_time)
+        system_condition(self.ecs_world, delta_time, self._on_condition_change)
         system_enemy_base_eye(self.ecs_world, delta_time)
         system_base_core(self.ecs_world, self._player_entity, self._world_size,
                          self._enemies_cfg, self._player_cfg["max_speed"])
@@ -218,8 +235,7 @@ class PlayScene(Scene):
         system_formation(self.ecs_world, self._player_entity, self._world_size,
                          self._formations_cfg["spacing"],
                          self._enemies_cfg["despawn_distance"], delta_time)
-        system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size,
-                   self._spy_cfg["escape_sound"])
+        system_spy(self.ecs_world, self._player_entity, self._camera, self._world_size)
         system_base_turrets(self.ecs_world, self._player_entity, self._world_size,
                             self._enemy_bullet_cfg, delta_time)
         system_movement(self.ecs_world, delta_time)
@@ -261,7 +277,7 @@ class PlayScene(Scene):
     def _update_score(self):
         score = system_hi_score(self.ecs_world)
         if self._session.update_score(score):
-            ServiceLocator.sounds_service.play(self._game_cfg["sound_extra_life"])
+            ServiceLocator.sounds_service.play_cfg(self._game_cfg["sound_extra_life"])
 
     def _next_level(self):
         if self._has_next_level():

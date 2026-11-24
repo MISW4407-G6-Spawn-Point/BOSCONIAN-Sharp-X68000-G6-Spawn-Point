@@ -8,6 +8,7 @@ from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_spy import CSpy
 from src.ecs.components.c_timed_spawner import CTimedSpawner
 from src.ecs.systems.s_enemy_spawner import current_condition
+from src.engine.service_locator import ServiceLocator
 
 
 def system_timed_spawner(world:esper.World, player_entity:int, camera:CCamera,
@@ -35,3 +36,4 @@ def system_timed_spawner(world:esper.World, player_entity:int, camera:CCamera,
             create_formation(world, player_entity, formations_cfg, enemies_cfg, player_speed)
         elif c_ts.kind == "spy":
             create_spy(world, player_entity, camera, spy_cfg, player_speed)
+            ServiceLocator.sounds_service.play_cfg(spy_cfg.get("appear_sound"))

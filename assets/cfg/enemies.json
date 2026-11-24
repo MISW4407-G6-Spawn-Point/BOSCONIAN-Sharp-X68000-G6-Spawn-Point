@@ -36,7 +36,7 @@
         "weights": {"i": 3, "p": 2, "e": 1}
     },
     "spawn_distance": 170,
-    "core_launch_sound": "assets/snd/portal.mp3",
+    "core_launch_sound": "assets/snd/portal.ogg",
     "despawn_distance": 420,
     "red_speed_multiplier": 2.0,
     "red_rate_multiplier": 2.0,

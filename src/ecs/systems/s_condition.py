@@ -1,3 +1,5 @@
+from typing import Callable
+
 import esper
 import pygame
 from src.ecs.components.c_condition_display import CConditionDisplay
@@ -19,7 +21,9 @@ _PHASE_LABELS = {
 }
 
 
-def system_condition(world: esper.World, delta_time: float) -> None:
+def system_condition(world: esper.World, delta_time: float,
+                     on_phase_change: Callable[[str], None] = None) -> None:
+    """Actualiza la alerta; on_phase_change recibe la nueva fase una sola vez por cambio"""
     for _, condition in world.get_component(CConditionDisplay):
         condition.elapsed_time += delta_time
         if condition.elapsed_time >= condition.red_time:
@@ -53,6 +57,8 @@ def system_condition(world: esper.World, delta_time: float) -> None:
         text_transform.pos = condition.text_position - pygame.Vector2(
             text_surface.surf.get_size()
         ) / 2
+        if on_phase_change is not None:
+            on_phase_change(phase)
 
 
 def reset_condition(world: esper.World) -> None:

@@ -13,6 +13,7 @@ from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.systems.s_condition import reset_condition
 from src.ecs.systems.s_mine_explosion import explode_mine
 from src.create.prefab_creator import create_score_popup
+from src.engine.service_locator import ServiceLocator
 
 
 _DESTRUCTIBLE_TYPES = {
@@ -62,6 +63,7 @@ def _explode_base(
         base_combat.get_core_center(base_origin),
         explosion_cfg,
     )
+    ServiceLocator.sounds_service.play_cfg(explosion_cfg.get("base_destroyed_sound"))
 
 
 def system_collision_bullet_level_object(

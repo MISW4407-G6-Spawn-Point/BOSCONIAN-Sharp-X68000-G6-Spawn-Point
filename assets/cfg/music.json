@@ -8,5 +8,11 @@
         "PLAY_SCENE":        {"track": "assets/mus/starshooterv2.1.ogg", "volume": 0.4},
         "GAME_OVER_SCENE":   {"track": "assets/mus/night_tune3.ogg", "volume": 0.5},
         "VICTORY_SCENE":     {"track": "assets/mus/exploratig_the_cosmos_1_sub_38_bit.ogg", "volume": 0.5}
-    }
+    },
+    "levels": [
+        {"track": "assets/mus/starshooterv2.1.ogg", "volume": 0.4},
+        {"track": "assets/mus/xenostar2loop_.ogg", "volume": 0.4},
+        {"track": "assets/mus/zero2.ogg", "volume": 0.4}
+    ],
+    "red_alert": {"track": "assets/mus/intense_momentloop.ogg", "volume": 0.45}
 }

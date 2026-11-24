@@ -1,3 +1,5 @@
+import os
+
 import pygame
 
 
@@ -14,13 +16,26 @@ class SoundService:
         return self._sounds[path]
 
     def play(self, path: str, volume: float = 1.0) -> None:
-        sound = self.get(path)
+        """Si el archivo no existe o no carga, no suena (no rompe el juego)"""
+        if not path or not os.path.exists(path):
+            return
+        try:
+            sound = self.get(path)
+        except pygame.error:
+            return
         sound.set_volume(volume)
         sound.play()
-    
+
+    def play_cfg(self, sound_cfg) -> None:
+        """Sonido de config: {"path": ..., "volume": ...} o solo la ruta"""
+        if isinstance(sound_cfg, dict):
+            self.play(sound_cfg.get("path"), sound_cfg.get("volume", 1.0))
+        elif sound_cfg:
+            self.play(sound_cfg)
+
     def play_music(self, path: str, volume: float = 0.5) -> None:
         """Musica de fondo en bucle. Si ya esta sonando esa pista, no la reinicia."""
-        if path == self._current_music:
+        if path == self._current_music or not os.path.exists(path):
             return
         pygame.mixer.music.load(path)
         pygame.mixer.music.set_volume(volume)

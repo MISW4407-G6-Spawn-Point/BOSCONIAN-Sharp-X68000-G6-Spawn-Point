@@ -10,11 +10,9 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_camera import world_to_screen
 from src.ecs.systems.s_enemy_state import shortest_delta
-from src.engine.service_locator import ServiceLocator
 
 
-def system_spy(world:esper.World, player_entity:int, camera:CCamera, world_size:dict,
-               escape_sound:str):
+def system_spy(world:esper.World, player_entity:int, camera:CCamera, world_size:dict):
     """Rebota la primera vez que toca el borde de la pantalla; la segunda se escapa y la alerta pasa a ROJA"""
     pl_t = world.component_for_entity(player_entity, CTransform)
     pl_s = world.component_for_entity(player_entity, CSurface)
@@ -41,8 +39,6 @@ def system_spy(world:esper.World, player_entity:int, camera:CCamera, world_size:
             world.delete_entity(entity)
             for _, condition in world.get_component(CConditionDisplay):
                 condition.elapsed_time = max(condition.elapsed_time, condition.red_time)
-            if escape_sound:
-                ServiceLocator.sounds_service.play(escape_sound)
             continue
         c_v.vel = c_sp.heading * c_sp.speed
 
