@@ -1,0 +1,24 @@
+{
+    "deadzone": 0.5,
+    "release_zone": 0.35,
+    "buttons": {
+        "0": "z",
+        "1": "x",
+        "2": "c",
+        "3": "i",
+        "6": "escape",
+        "7": "return"
+    },
+    "web_buttons": {
+        "0": "z",
+        "1": "x",
+        "2": "c",
+        "3": "i",
+        "8": "escape",
+        "9": "return",
+        "12": "up",
+        "13": "down",
+        "14": "left",
+        "15": "right"
+    }
+}

@@ -670,6 +670,7 @@ def create_input_play(world:esper.World):
         ("PLAYER_FIRE", pygame.K_z),
         ("PLAYER_SPECIAL", pygame.K_x),
         ("PAUSE", pygame.K_p),
+        ("PAUSE", pygame.K_RETURN),
         ("SHOW_INSTRUCTIONS", pygame.K_i),
         ("SHOW_CREDITS", pygame.K_c),
         ("BACK_TO_TITLE", pygame.K_ESCAPE),

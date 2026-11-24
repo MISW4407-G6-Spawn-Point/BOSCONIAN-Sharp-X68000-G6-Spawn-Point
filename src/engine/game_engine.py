@@ -4,6 +4,7 @@ import asyncio
 import sys
 import pygame
 
+from src.engine.gamepad_input import GamepadInput
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
 from src.game.boot_scene import BootScene
@@ -29,6 +30,7 @@ class GameEngine:
         self.screen = pygame.display.set_mode(
             (self.window_cfg["size"]["w"], self.window_cfg["size"]["h"]),
             0 if sys.platform == "emscripten" else pygame.SCALED)
+        self._gamepad = GamepadInput(ServiceLocator.configs_service.get("assets/cfg/gamepad.json"))
         self.clock = pygame.time.Clock()
         self.is_running = False
         self.framerate = self.window_cfg["framerate"]
@@ -96,7 +98,8 @@ class GameEngine:
 
     def _process_events(self):
         for event in pygame.event.get():
-            self._current_scene.do_process_events(event)
+            for scene_event in self._gamepad.translate(event):
+                self._current_scene.do_process_events(scene_event)
             if event.type == pygame.QUIT:
                 self.is_running = False
 

@@ -106,6 +106,16 @@
                 "F4      LEVEL EDITOR"
             ],
             [
+                {"text": "GAMEPAD", "color": {"r": 255, "g": 210, "b": 120}},
+                "D-PAD / STICK  MOVE",
+                "A        FIRE, CONFIRM",
+                "B        SPEED BOOST",
+                "START    START / PAUSE",
+                "BACK     TITLE",
+                "Y        HOW TO PLAY",
+                "X        CREDITS"
+            ],
+            [
                 {"text": "SPEED BOOST", "color": {"r": 255, "g": 210, "b": 120}},
                 {"text": "CAPSULE: +1 BOOST", "icon": {"capsule": true}},
                 {"text": "X: SPEED X2 FOR 4 SEC.", "indent": true},
@@ -201,7 +211,7 @@
         "blink_time": 0,
         "hide_world": true,
         "menu": {
-            "lines": ["P: RESUME", "I: HOW TO PLAY", "C: CREDITS", "ESC: TITLE"],
+            "lines": ["P/START: RESUME", "I/Y: HOW TO PLAY", "C/X: CREDITS", "ESC/BACK: TITLE"],
             "size": 8,
             "color": {"r": 160, "g": 160, "b": 160},
             "align": "left",
