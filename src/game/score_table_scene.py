@@ -24,8 +24,9 @@ class ScoreTableScene(Scene):
         self._play_area = interface_cfg["play_area"]
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=True)
-        create_hud(self.ecs_world, interface_cfg["hud"], font, None, 0, 1,
-                   self._game_engine.session.hi_score)
+        session = self._game_engine.session
+        create_hud(self.ecs_world, interface_cfg["hud"], font, None, 0, session.level,
+                   session.hi_score)
         create_texts(self.ecs_world, [table["title"]], font)
         for i, row in enumerate(table["rows"]):
             y = table["row_y"] + i * table["row_step"]

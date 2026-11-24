@@ -29,7 +29,8 @@ class TitleScene(Scene):
         create_starfield(self.ecs_world, world_cfg, interface_cfg["play_area"], in_menu=True)
         create_logo(self.ecs_world, interface_cfg["title_scene"]["logo"])
         create_texts(self.ecs_world, interface_cfg["title_scene"]["texts"], font)
-        create_hud(self.ecs_world, interface_cfg["hud"], font, None, 0, 1, session.hi_score)
+        create_hud(self.ecs_world, interface_cfg["hud"], font, None, 0, session.level,
+                   session.hi_score)
         create_scene_timer(self.ecs_world, scenes_cfg["TITLE_SCENE"])
         create_input_title(self.ecs_world)
 

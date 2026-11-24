@@ -624,6 +624,8 @@ def create_input_play(world:esper.World):
         ("PLAYER_FIRE", pygame.K_z),
         ("PLAYER_SPECIAL", pygame.K_x),
         ("PAUSE", pygame.K_p),
+        ("SHOW_INSTRUCTIONS", pygame.K_i),
+        ("SHOW_CREDITS", pygame.K_c),
         ("BACK_TO_TITLE", pygame.K_ESCAPE),
         ("CHEAT_NEXT_LEVEL", pygame.K_F1),
         ("CHEAT_GOD_MODE", pygame.K_F2),
@@ -750,6 +752,48 @@ def create_pause_text(world:esper.World, pause_cfg:dict, font_path:str) -> int:
         world.add_component(text_entity, CBlink(c_s.surf, pause_cfg["blink_time"]))
     world.add_component(text_entity, CTagPause())
     return text_entity
+
+
+def create_pause_menu(world:esper.World, pause_cfg:dict, font_path:str) -> None:
+    """Menu de pausa: titulo PAUSED y una linea por opcion"""
+    create_pause_text(world, pause_cfg, font_path)
+    menu = pause_cfg["menu"]
+    for i, line in enumerate(menu["lines"]):
+        pos = {"x": menu["x"], "y": menu["y"] + i * menu["line_height"]}
+        entity = create_text(world, line, font_path, menu["size"], menu["color"], pos,
+                             menu["align"], layer=3)
+        world.add_component(entity, CTagPause())
+
+
+def create_text_page(world:esper.World, page_cfg:dict, font_path:str, page_index:int,
+                     layer:int = 1) -> list:
+    """Lineas de una pagina de instrucciones/creditos y su marcador 1/2"""
+    page = page_cfg["pages"][page_index]
+    entities = []
+    for i, line in enumerate(page["lines"]):
+        pos = {"x": page_cfg["line_x"], "y": page_cfg["line_y"] + i * page_cfg["line_height"]}
+        entities.append(create_text(world, line, font_path, page_cfg["size"],
+                                    page.get("color", page_cfg["color"]), pos,
+                                    page_cfg["align"], layer))
+    if len(page_cfg["pages"]) > 1:
+        marker = page_cfg["page_marker"]
+        text = marker["text"].format(page=page_index + 1, total=len(page_cfg["pages"]))
+        entities.append(create_text(world, text, font_path, page_cfg["size"], marker["color"],
+                                    marker["position"], layer=layer))
+    return entities
+
+
+def create_pause_page(world:esper.World, page_cfg:dict, hint_cfg:dict, font_path:str,
+                      page_index:int) -> None:
+    """Pagina de instrucciones o creditos dentro de la pausa"""
+    title = page_cfg["title"]
+    entities = [create_text(world, title["text"], font_path, title["size"], title["color"],
+                            title["position"], layer=3)]
+    entities += create_text_page(world, page_cfg, font_path, page_index, layer=3)
+    entities.append(create_text(world, hint_cfg["text"], font_path, hint_cfg["size"],
+                                hint_cfg["color"], hint_cfg["position"], layer=3))
+    for entity in entities:
+        world.add_component(entity, CTagPause())
 
 
 def create_special_shot_message(world:esper.World, msg_cfg:dict, font_path:str) -> int:

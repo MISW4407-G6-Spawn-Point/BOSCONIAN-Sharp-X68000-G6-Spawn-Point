@@ -1,8 +1,8 @@
 """Escena de paginas de texto (instrucciones, creditos). Se configura en interface.json."""
 
 from src.create.prefab_creator import (create_hud, create_input_title,
-                                       create_scene_timer, create_starfield, create_text,
-                                       create_texts)
+                                       create_scene_timer, create_starfield,
+                                       create_text_page, create_texts)
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_movement import system_movement
@@ -31,8 +31,9 @@ class TextPageScene(Scene):
         self._play_area = interface_cfg["play_area"]
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=True)
-        create_hud(self.ecs_world, interface_cfg["hud"], self._font, None, 0, 1,
-                   self._game_engine.session.hi_score)
+        session = self._game_engine.session
+        create_hud(self.ecs_world, interface_cfg["hud"], self._font, None, 0, session.level,
+                   session.hi_score)
         create_texts(self.ecs_world, [self._page_cfg["title"]], self._font)
         create_scene_timer(self.ecs_world, scene_cfg)
         create_input_title(self.ecs_world)
@@ -46,20 +47,8 @@ class TextPageScene(Scene):
         """Borra la pagina anterior y crea las lineas de la actual"""
         for entity in self._page_entities:
             self.ecs_world.delete_entity(entity)
-        cfg = self._page_cfg
-        page = cfg["pages"][self._page_index]
-        self._page_entities = []
-        for i, line in enumerate(page["lines"]):
-            pos = {"x": cfg["line_x"], "y": cfg["line_y"] + i * cfg["line_height"]}
-            self._page_entities.append(create_text(
-                self.ecs_world, line, self._font, cfg["size"],
-                page.get("color", cfg["color"]), pos, align=cfg["align"]))
-        if len(cfg["pages"]) > 1:
-            marker = cfg["page_marker"]
-            text = marker["text"].format(page=self._page_index + 1, total=len(cfg["pages"]))
-            self._page_entities.append(create_text(
-                self.ecs_world, text, self._font, cfg["size"], marker["color"],
-                marker["position"]))
+        self._page_entities = create_text_page(self.ecs_world, self._page_cfg, self._font,
+                                               self._page_index)
 
     def do_update(self, delta_time:float):
         system_blink(self.ecs_world, delta_time)

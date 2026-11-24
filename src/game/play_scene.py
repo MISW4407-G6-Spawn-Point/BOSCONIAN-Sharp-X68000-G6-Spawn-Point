@@ -4,7 +4,8 @@ import pygame
 
 from src.create.prefab_creator import (create_camera, create_enemy_spawner, create_hud,
                                        create_input_play, create_level_objects,
-                                       create_pause_text, create_player_bullets,
+                                       create_pause_menu, create_pause_page,
+                                       create_player_bullets,
                                        create_player_ship, create_radar_dot,
                                        create_starfield,
                                        create_timed_spawner,
@@ -71,6 +72,13 @@ _DIRECTION_INPUTS = {
 }
 
 
+# Comando -> config de paginas que se muestra dentro de la pausa
+_PAUSE_PAGES = {
+    "SHOW_INSTRUCTIONS": "instructions_scene",
+    "SHOW_CREDITS": "credits_scene",
+}
+
+
 class PlayScene(Scene):
     def __init__(self, game_engine):
         super().__init__(game_engine)
@@ -104,7 +112,9 @@ class PlayScene(Scene):
         self._alerts_cfg = interface_cfg["alerts"]
         self._formations_cfg = ServiceLocator.configs_service.get("assets/cfg/formations.json")
         self._spy_cfg = ServiceLocator.configs_service.get("assets/cfg/spy.json")
+        self._interface_cfg = interface_cfg
         self._paused = False
+        self._pause_view = None
 
         create_starfield(self.ecs_world, world_cfg, self._play_area, in_menu=False)
         self._player_entity = create_player_ship(self.ecs_world, self._player_cfg,
@@ -218,6 +228,7 @@ class PlayScene(Scene):
     def do_update(self, delta_time:float):
         system_blink(self.ecs_world, delta_time)
         if self._paused:
+            self._update_pause_page(delta_time)
             return  # en pausa solo titilan las estrellas
         system_condition(self.ecs_world, delta_time, self._on_condition_change)
         system_enemy_base_eye(self.ecs_world, delta_time)
@@ -305,15 +316,49 @@ class PlayScene(Scene):
         hide_world = self._paused and self._pause_cfg["hide_world"]
         system_rendering(self.ecs_world, screen, self._camera, hide_world)
 
+    def _clear_pause_texts(self):
+        for entity, _ in self.ecs_world.get_component(CTagPause):
+            self.ecs_world.delete_entity(entity)
+
+    def _show_pause_view(self, view:str, page_index:int = 0):
+        """view: "menu" o el nombre de la config de paginas (instructions_scene, credits_scene)"""
+        self._clear_pause_texts()
+        self._pause_view = view
+        if view == "menu":
+            create_pause_menu(self.ecs_world, self._pause_cfg, self._font)
+            return
+        page_cfg = self._interface_cfg[view]
+        self._page_index = page_index
+        self._page_time = page_cfg["page_time"]
+        create_pause_page(self.ecs_world, page_cfg, self._pause_cfg["page_hint"], self._font,
+                          page_index)
+
+    def _update_pause_page(self, delta_time:float):
+        """Las paginas con mas de una hoja rotan solas, como en su escena"""
+        if self._pause_view in (None, "menu"):
+            return
+        page_cfg = self._interface_cfg[self._pause_view]
+        self._page_time -= delta_time
+        if self._page_time <= 0 and len(page_cfg["pages"]) > 1:
+            self._show_pause_view(self._pause_view,
+                                  (self._page_index + 1) % len(page_cfg["pages"]))
+
     def _toggle_pause(self):
+        if self._paused and self._pause_view != "menu":
+            self._show_pause_view("menu")  # P en una pagina vuelve al menu
+            return
         self._paused = not self._paused
         if self._paused:
             ServiceLocator.sounds_service.pause_music()
-            create_pause_text(self.ecs_world, self._pause_cfg, self._font)
+            self._show_pause_view("menu")
         else:
             ServiceLocator.sounds_service.unpause_music()
-            for entity, _ in self.ecs_world.get_component(CTagPause):
-                self.ecs_world.delete_entity(entity)
+            self._clear_pause_texts()
+            self._pause_view = None
+
+    def _toggle_pause_page(self, view:str):
+        """I o C: abre la pagina; la misma tecla vuelve al menu"""
+        self._show_pause_view("menu" if self._pause_view == view else view)
 
     def do_action(self, action:CInputCommand):
         if action.name == "BACK_TO_TITLE" and action.phase == CommandPhase.STARTED:
@@ -322,6 +367,11 @@ class PlayScene(Scene):
 
         if action.name == "PAUSE" and action.phase == CommandPhase.STARTED:
             self._toggle_pause()
+            return
+
+        if action.name in _PAUSE_PAGES and action.phase == CommandPhase.STARTED:
+            if self._paused:
+                self._toggle_pause_page(_PAUSE_PAGES[action.name])
             return
 
         if action.name in _DIRECTION_INPUTS:
